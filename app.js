@@ -4,20 +4,23 @@ const bodyParser = require("body-parser");
 const productRoutes = require("./routes/productRoutes");
 const variantRoutes = require("./routes/variantRoutes");
 const customerReturnRoutes = require("./routes/customerReturnRoutes");
+const authRoutes = require("./routes/authRoutes");
 const sequelize = require("./configs/db");
+const cors = require("cors");
 
 const app = express();
 app.use(bodyParser.json());
-
+app.use(cors());
+app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/variants", variantRoutes);
 app.use("/api/customer-return", customerReturnRoutes);
 (async () => {
   try {
     await sequelize.authenticate();
-    console.log("✅ Database connected successfully.");
+    console.log("Database connected successfully.");
   } catch (error) {
-    console.error("❌ Database connection failed:", error.message);
+    console.error("Database connection failed:", error.message);
   }
 })();
 

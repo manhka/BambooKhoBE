@@ -1,7 +1,7 @@
 const sequelize = require("../configs/db");
 const Product = require("./Product");
 const Variant = require("./Variant");
-
+const User = require("./User");
 Product.hasMany(Variant, {
   foreignKey: "BarcodeProduct",
   sourceKey: "BarcodeProduct",
@@ -11,4 +11,4 @@ Variant.belongsTo(Product, {
   targetKey: "BarcodeProduct",
 });
 
-module.exports = { sequelize, Product, Variant };
+module.exports = { sequelize, Product, Variant, User };
