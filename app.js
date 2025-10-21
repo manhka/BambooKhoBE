@@ -7,6 +7,7 @@ const customerReturnRoutes = require("./routes/customerReturnRoutes");
 const authRoutes = require("./routes/authRoute");
 const userRoutes = require("./routes/userRoute");
 const sequelize = require("./configs/db");
+const activityRoutes = require("./routes/activityRoute");
 const cors = require("cors");
 
 const app = express();
@@ -17,6 +18,7 @@ app.use("/api/variants", variantRoutes);
 app.use("/api/customer-return", customerReturnRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/activities", activityRoutes);
 (async () => {
   try {
     await sequelize.authenticate();

@@ -43,7 +43,6 @@ exports.toggleUserStatus = async (req, res) => {
     user.Status = newStatus;
     await user.save();
     res.json({ message: "Đã cập nhật trạng thái user", newStatus });
-    console.log("Old status:", user.Status, "New status:", newStatus);
   } catch (error) {
     console.error("Lỗi khi cập nhật status:", error);
     res.status(500).json({ message: "Lỗi server" });
