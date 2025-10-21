@@ -4,14 +4,19 @@ const bodyParser = require("body-parser");
 const productRoutes = require("./routes/productRoutes");
 const variantRoutes = require("./routes/variantRoutes");
 const customerReturnRoutes = require("./routes/customerReturnRoutes");
+const authRoutes = require("./routes/authRoute");
+const userRoutes = require("./routes/userRoute");
 const sequelize = require("./configs/db");
+const cors = require("cors");
 
 const app = express();
 app.use(bodyParser.json());
-
+app.use(cors());
 app.use("/api/products", productRoutes);
 app.use("/api/variants", variantRoutes);
 app.use("/api/customer-return", customerReturnRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 (async () => {
   try {
     await sequelize.authenticate();
@@ -21,5 +26,5 @@ app.use("/api/customer-return", customerReturnRoutes);
   }
 })();
 
-const PORT = process.env.PORT || 3000;
+const PORT = 3001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
