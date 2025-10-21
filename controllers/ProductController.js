@@ -110,7 +110,7 @@ exports.getProducts = async (req, res) => {
           where: Object.keys(brandConditions).length
             ? brandConditions
             : undefined,
-          required: false,
+          required: Object.keys(brandConditions).length ? true : false,
         },
         {
           model: Category,
@@ -118,7 +118,7 @@ exports.getProducts = async (req, res) => {
           where: Object.keys(categoryConditions).length
             ? categoryConditions
             : undefined,
-          required: false,
+          required: Object.keys(categoryConditions).length ? true : false,
         },
       ],
       order: [["CreateAt", "DESC"]],

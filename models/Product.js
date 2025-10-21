@@ -23,15 +23,12 @@ const Product = sequelize.define(
     Image: {
       type: DataTypes.STRING(250),
     },
+    Description: {
+      type: DataTypes.TEXT,
+    },
     IsArchive: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
-    },
-    CreateAt: {
-      type: DataTypes.DATE,
-    },
-    UpdateAt: {
-      type: DataTypes.DATE,
     },
     BrandID: {
       type: DataTypes.INTEGER,
@@ -46,6 +43,23 @@ const Product = sequelize.define(
         model: "Category",
         key: "CategoryID",
       },
+    },
+    CostPrice: {
+      type: DataTypes.DECIMAL(15, 2),
+      allowNull: false,
+      defaultValue: 0.0,
+    },
+    SalePrice: {
+      type: DataTypes.DECIMAL(15, 2),
+      allowNull: false,
+      defaultValue: 0.0,
+    },
+
+    CreateAt: {
+      type: DataTypes.DATE,
+    },
+    UpdateAt: {
+      type: DataTypes.DATE,
     },
   },
   {
