@@ -1,15 +1,15 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../configs/db");
 
-const ExportOrder = sequelize.define(
-  "ExportOrder",
+const ImportOrder = sequelize.define(
+  "ImportOrder",
   {
-    ExportID: {
+    ImportID: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
-    ExportDate: {
+    ImportDate: {
       type: DataTypes.DATEONLY,
       allowNull: true,
     },
@@ -17,19 +17,27 @@ const ExportOrder = sequelize.define(
       type: DataTypes.DECIMAL(10, 2),
       allowNull: true,
     },
+    SupplierID: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "Supplier",
+        key: "SupplierID",
+      },
+    },
     UserID: {
       type: DataTypes.INTEGER,
       allowNull: true,
-    },
-    CustomerID: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
+      references: {
+        model: "User",
+        key: "UserID",
+      },
     },
   },
   {
-    tableName: "ExportOrder",
+    tableName: "ImportOrder",
     timestamps: false,
   }
 );
 
-module.exports = ExportOrder;
+module.exports = ImportOrder;

@@ -1,12 +1,12 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../configs/db");
-const CustomerReturnOrder = require("./CustomerReturnOrder");
+const SupplierReturnOrder = require("./SupplierReturnOrder");
 const Product = require("./Product");
 
-const CustomerReturnDetail = sequelize.define(
-  "CustomerReturnDetail",
+const SupplierReturnDetail = sequelize.define(
+  "SupplierReturnDetail",
   {
-    CustomerReturnDetailID: {
+    SupplierReturnDetailID: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
@@ -19,17 +19,15 @@ const CustomerReturnDetail = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    CustomerReturnOrderID: {
+    SupplierReturnOrderID: {
       type: DataTypes.INTEGER,
-      allowNull: false,
       references: {
-        model: CustomerReturnOrder,
+        model: SupplierReturnOrder,
         key: "ReturnID",
       },
     },
     BarcodeProduct: {
       type: DataTypes.STRING(100),
-      allowNull: false,
       references: {
         model: Product,
         key: "BarcodeProduct",
@@ -37,9 +35,9 @@ const CustomerReturnDetail = sequelize.define(
     },
   },
   {
-    tableName: "CustomerReturnDetail",
+    tableName: "SupplierReturnDetail",
     timestamps: false,
   }
 );
 
-module.exports = CustomerReturnDetail;
+module.exports = SupplierReturnDetail;

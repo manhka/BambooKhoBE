@@ -58,7 +58,4 @@ const ExportDetail = sequelize.define(
   }
 );
 
-ExportDetail.belongsTo(ExportOrder, { foreignKey: "ExportID" });
-ExportDetail.belongsTo(Product, { foreignKey: "BarcodeProduct" });
-
 module.exports = ExportDetail;
