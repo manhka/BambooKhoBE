@@ -1,15 +1,15 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../configs/db");
 
-const Customer = sequelize.define(
-  "Customer",
+const Supplier = sequelize.define(
+  "Supplier",
   {
-    CustomerID: {
+    SupplierID: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
-    CustomerName: {
+    SupplierName: {
       type: DataTypes.STRING(100),
       allowNull: false,
     },
@@ -21,11 +21,15 @@ const Customer = sequelize.define(
       type: DataTypes.STRING(12),
       allowNull: true,
     },
+    Email: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
   },
   {
-    tableName: "Customer",
-    timestamps: true,
+    tableName: "Supplier",
+    timestamps: false,
   }
 );
 
-module.exports = Customer;
+module.exports = Supplier;

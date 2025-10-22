@@ -2,6 +2,7 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../configs/db");
 const Brand = require("./Brand");
 const Category = require("./Category");
+const Variant = require("./Variant");
 
 const Product = sequelize.define(
   "Product",
@@ -54,21 +55,11 @@ const Product = sequelize.define(
       allowNull: false,
       defaultValue: 0.0,
     },
-
-    CreateAt: {
-      type: DataTypes.DATE,
-    },
-    UpdateAt: {
-      type: DataTypes.DATE,
-    },
   },
   {
     tableName: "Product",
-    timestamps: false,
+    timestamps: true,
   }
 );
-
-Product.belongsTo(Brand, { foreignKey: "BrandID" });
-Product.belongsTo(Category, { foreignKey: "CategoryID" });
 
 module.exports = Product;
