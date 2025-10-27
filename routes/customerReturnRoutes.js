@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const customerReturnController = require("../controllers/CustomerReturnController");
+router.get("/warranty", customerReturnController.getWarrantyProducts);
 
 router.post("/create", customerReturnController.createCustomerReturn);
 

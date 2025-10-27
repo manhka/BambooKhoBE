@@ -4,10 +4,68 @@ const ExportDetail = require("../models/ExportDetail");
 const Product = require("../models/Product");
 const Customer = require("../models/Customer");
 const User = require("../models/User");
+const { Op } = require("sequelize");
 const ExportOrder = require("../models/ExportOrder");
 const {
   validateCustomerReturnInput,
 } = require("../validators/CustomerReturnValidator");
+exports.getWarrantyProducts = async (req, res) => {
+  try {
+    const { customerId, barcodeProduct, warrantyStart, warrantyEnd } =
+      req.query;
+
+    // Build where clause cho ExportDetail
+    const detailWhere = {
+      WarrantyStatus: true, // chỉ lấy sản phẩm còn bảo hành
+    };
+
+    if (barcodeProduct) {
+      detailWhere.BarcodeProduct = barcodeProduct;
+    }
+
+    if (warrantyStart && warrantyEnd) {
+      detailWhere.WarrantyStartTime = { [Op.gte]: new Date(warrantyStart) };
+      detailWhere.WarrantyEndTime = { [Op.lte]: new Date(warrantyEnd) };
+    } else if (warrantyStart) {
+      detailWhere.WarrantyEndTime = { [Op.gte]: new Date(warrantyStart) };
+    } else if (warrantyEnd) {
+      detailWhere.WarrantyStartTime = { [Op.lte]: new Date(warrantyEnd) };
+    }
+
+    // Build include clause
+    const includeClause = [
+      {
+        model: ExportOrder,
+        as: "ExportOrder",
+        attributes: ["ExportID", "CustomerID", "ExportDate"],
+        where: customerId ? { CustomerID: customerId } : undefined,
+      },
+      {
+        model: Product,
+        as: "Product",
+        attributes: ["ProductName", "Image", "BrandID", "CategoryID"],
+      },
+    ];
+
+    const warrantyProducts = await ExportDetail.findAll({
+      where: detailWhere,
+      include: includeClause,
+      order: [["ExportDetailID", "DESC"]],
+    });
+
+    return res.status(200).json({
+      message: "Warranty products fetched successfully",
+      count: warrantyProducts.length,
+      data: warrantyProducts,
+    });
+  } catch (error) {
+    console.error("Error fetching warranty products:", error);
+    return res.status(500).json({
+      message: "Failed to fetch warranty products",
+      error: error.message,
+    });
+  }
+};
 
 exports.createCustomerReturn = async (req, res) => {
   const transaction = await CustomerReturnOrder.sequelize.transaction();
@@ -42,10 +100,10 @@ exports.createCustomerReturn = async (req, res) => {
       }
 
       // ===== 4. Kiểm tra hạn bảo hành (nếu có) =====
-      if (exportDetail.warranty_time && exportDetail.warranty_start_date) {
-        const start = new Date(exportDetail.warranty_start_date);
+      if (exportDetail.WarrantyTime && exportDetail.WarrantyStartTime) {
+        const start = new Date(exportDetail.WarrantyStartTime);
         const end = new Date(start);
-        end.setMonth(end.getMonth() + exportDetail.warranty_time);
+        end.setMonth(end.getMonth() + exportDetail.WarrantyTime);
         const today = new Date(ReturnDate);
 
         if (today > end) {
@@ -122,57 +180,68 @@ exports.getCustomerReturns = async (req, res) => {
   try {
     const { fromDate, toDate, userID, exportID, barcode } = req.query;
 
+    // Build where clause cho CustomerReturnOrder
     const whereClause = {};
-
     if (fromDate && toDate) {
-      whereClause.ReturnDate = { [Op.between]: [fromDate, toDate] };
+      whereClause.ReturnDate = {
+        [Op.between]: [new Date(fromDate), new Date(toDate)],
+      };
     } else if (fromDate) {
-      whereClause.ReturnDate = { [Op.gte]: fromDate };
+      whereClause.ReturnDate = { [Op.gte]: new Date(fromDate) };
     } else if (toDate) {
-      whereClause.ReturnDate = { [Op.lte]: toDate };
+      whereClause.ReturnDate = { [Op.lte]: new Date(toDate) };
     }
 
     if (userID) whereClause.UserID = userID;
     if (exportID) whereClause.ExportID = exportID;
 
+    // Build include clause
+    const includeClause = [
+      {
+        model: CustomerReturnDetail,
+        as: "CustomerReturnDetails", // trùng alias với hasMany association
+        include: [
+          {
+            model: Product,
+            as: "Product", // trùng alias với belongsTo association
+            attributes: ["ProductName", "BarcodeProduct"],
+            where: barcode ? { BarcodeProduct: barcode } : undefined,
+          },
+        ],
+      },
+      {
+        model: User,
+        as: "User", // nếu association có alias
+        attributes: ["Username"],
+      },
+      {
+        model: ExportOrder,
+        as: "ExportOrder", // trùng alias với belongsTo association
+        attributes: ["ExportID", "CustomerID", "ExportDate"],
+        include: [
+          {
+            model: Customer,
+            as: "Customer", // trùng alias với belongsTo association
+            attributes: ["CustomerName", "Address", "Phone"],
+          },
+        ],
+      },
+    ];
+
     const returnOrders = await CustomerReturnOrder.findAll({
       where: whereClause,
-      include: [
-        {
-          model: CustomerReturnDetail,
-          include: [
-            { model: Product, attributes: ["ProductName", "BarcodeProduct"] },
-          ],
-        },
-        {
-          model: User,
-          attributes: ["Username"],
-        },
-        {
-          model: ExportOrder,
-          attributes: ["ExportID"],
-          include: [
-            {
-              model: Customer,
-              attributes: ["CustomerName", "Address", "Phone"],
-            },
-          ],
-        },
-      ],
+      include: includeClause,
       order: [["ReturnDate", "DESC"]],
     });
 
-    // Nếu có barcode thì lọc thủ công (do nested include)
-    const filteredOrders = barcode
-      ? returnOrders.filter((order) =>
-          order.CustomerReturnDetails.some((d) => d.BarcodeProduct === barcode)
-        )
-      : returnOrders;
-
-    res.status(200).json(filteredOrders);
+    res.status(200).json({
+      message: "Customer return orders fetched successfully",
+      count: returnOrders.length,
+      data: returnOrders,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error", error });
+    console.error("Error fetching customer returns:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 // xem chi tiết đơn trả hàng
@@ -184,20 +253,28 @@ exports.getCustomerReturnById = async (req, res) => {
       include: [
         {
           model: CustomerReturnDetail,
+          as: "CustomerReturnDetails", // phải trùng alias
           include: [
-            { model: Product, attributes: ["ProductName", "BarcodeProduct"] },
+            {
+              model: Product,
+              as: "Product", // phải trùng alias
+              attributes: ["ProductName", "BarcodeProduct"],
+            },
           ],
         },
         {
           model: User,
+          as: "User", // nếu association có alias
           attributes: ["Username"],
         },
         {
           model: ExportOrder,
-          attributes: ["ExportID"],
+          as: "ExportOrder", // phải trùng alias
+          attributes: ["ExportID", "CustomerID", "ExportDate"],
           include: [
             {
               model: Customer,
+              as: "Customer", // phải trùng alias
               attributes: ["CustomerName", "Address", "Phone"],
             },
           ],
@@ -212,6 +289,6 @@ exports.getCustomerReturnById = async (req, res) => {
     res.status(200).json(returnOrder);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error", error });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
