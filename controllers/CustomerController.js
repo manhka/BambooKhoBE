@@ -18,7 +18,7 @@ exports.searchCustomers = async (req, res) => {
     });
 
     res.status(200).json({
-      data: customers,
+      customers: customers,
       message: "Customers fetched successfully",
     });
   } catch (error) {
