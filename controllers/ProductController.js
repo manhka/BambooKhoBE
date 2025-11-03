@@ -1,6 +1,6 @@
 const { sequelize, Product, Variant, Brand, Category } = require("../models");
 const ProductValidator = require("../validators/ProductValidator");
-const { validateVariantInput } = require("../validators/VariantValidator");
+const VariantValidator = require("../validators/VariantValidator");
 const { Op } = require("sequelize");
 exports.createProductWithVariants = async (req, res) => {
   const {
@@ -206,57 +206,62 @@ exports.updateProductWithVariants = async (req, res) => {
     });
   }
 };
+
 exports.getAllProducts = async (req, res) => {
   try {
-    const { BrandID, CategoryID, ProductName } = req.query;
+    const { keyword, BrandID, CategoryID } = req.query;
 
-    // Xây dựng điều kiện WHERE linh hoạt
+    console.log("===== 🟢 INPUT QUERY PARAMS =====");
+    console.log("keyword:", keyword);
+    console.log("BrandID:", BrandID);
+    console.log("CategoryID:", CategoryID);
+
     const whereClause = {};
-    if (BrandID) whereClause.BrandID = BrandID;
-    if (CategoryID) whereClause.CategoryID = CategoryID;
-    if (ProductName) {
-      whereClause.ProductName = { [Op.like]: `%${ProductName}%` };
+
+    // 🔹 Lọc theo Brand và Category nếu có
+    if (BrandID) whereClause.BrandID = Number(BrandID);
+    if (CategoryID) whereClause.CategoryID = Number(CategoryID);
+
+    // 🔹 Nếu có keyword → tìm trong ProductName hoặc BarcodeProduct
+    if (keyword && keyword.trim() !== "") {
+      whereClause[Op.or] = [
+        { ProductName: { [Op.like]: `%${keyword.trim()}%` } },
+        { BarcodeProduct: { [Op.like]: `%${keyword.trim()}%` } },
+      ];
     }
 
-    // Truy vấn dữ liệu
+    console.log("===== 🟡 WHERE CLAUSE BUILT =====");
+    console.log(whereClause);
+
+    // ✅ Truy vấn
     const products = await Product.findAll({
       where: whereClause,
       include: [
         {
           model: Brand,
-          as: "Brand",
           attributes: ["BrandID", "BrandName"],
         },
         {
           model: Category,
-          as: "Category",
           attributes: ["CategoryID", "CategoryName"],
         },
-        {
-          model: Variant,
-          as: "Variants",
-          attributes: [
-            "VariantID",
-            "AttributeName",
-            "Value",
-            "Unit",
-            "Description",
-          ],
-        },
       ],
-      order: [["createdAt", "DESC"]], // ✅ đúng tên cột trong DB
+      order: [["createdAt", "DESC"]],
     });
 
-    return res.status(200).json({
-      message: "Products retrieved successfully",
+    console.log("===== 🔵 QUERY RESULT =====");
+    console.log("Total products found:", products.length);
+
+    res.status(200).json({
+      success: true,
       count: products.length,
-      products,
+      data: products,
     });
   } catch (error) {
-    console.error("Error fetching products:", error);
-    return res.status(500).json({
-      message: "Failed to fetch products",
-      error: error.message,
+    console.error("❌ Error fetching products:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi khi lấy danh sách sản phẩm",
     });
   }
 };

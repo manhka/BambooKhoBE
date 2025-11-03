@@ -3,7 +3,7 @@ const VariantValidator = require("../validators/VariantValidator");
 const Product = require("../models/Product");
 
 exports.createVariants = async (req, res) => {
-  const data = req.body; // data là mảng
+  const data = req.body;
   if (!Array.isArray(data) || data.length === 0) {
     return res
       .status(400)

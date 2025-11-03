@@ -18,13 +18,13 @@ exports.validateVariantInput = (data, isUpdate = false) => {
   }
 
   //  Description (optional)
-  if (data.Description !== undefined) {
-    if (typeof data.Description !== "string") {
-      errors.Description = "Description must be a string";
-    } else if (data.Description.length > 500) {
-      errors.Description = "Description must not exceed 500 characters";
-    }
-  }
+  // if (data.Description !== undefined) {
+  //   if (typeof data.Description !== "string") {
+  //     errors.Description = "Description must be a string";
+  //   } else if (data.Description.length > 500) {
+  //     errors.Description = "Description must not exceed 500 characters";
+  //   }
+  // }
 
   // //  BarcodeProduct
   // if (!isUpdate || data.BarcodeProduct !== undefined) {
