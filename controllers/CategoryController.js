@@ -16,7 +16,7 @@ exports.getAllCategories = async (req, res) => {
 
     const categories = await Category.findAll({
       where: whereCondition,
-      order: [["CreateAt", "DESC"]],
+      order: [["CreatedAt", "DESC"]],
     });
 
     if (categories.length === 0) {

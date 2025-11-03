@@ -15,7 +15,7 @@ exports.getAllBrands = async (req, res) => {
 
     const brands = await Brand.findAll({
       where: whereCondition,
-      order: [["CreateAt", "DESC"]],
+      order: [["CreatedAt", "DESC"]],
     });
 
     if (brands.length === 0) {
