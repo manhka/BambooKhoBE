@@ -6,7 +6,7 @@ const productController = require("../controllers/ProductController");
 router.post("/create", productController.createProductWithVariants);
 router.put("/update/:barcode", productController.updateProductWithVariants);
 router.get("/", productController.getAllProducts);
-router.patch("/:barcode/archive", productController.archiveProduct);
+router.patch("/archive/:barcode", productController.archiveProduct);
 router.get("/stock/warning", productController.getLowStockProducts);
 router.get("/details/:barcode", productController.getProductDetail);
 module.exports = router;

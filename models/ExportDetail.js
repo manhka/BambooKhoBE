@@ -37,7 +37,7 @@ const ExportDetail = sequelize.define(
         key: "BarcodeProduct",
       },
     },
-    warranty_time: {
+    WarrantyTime: {
       type: DataTypes.DOUBLE,
       allowNull: true,
     },
@@ -46,7 +46,9 @@ const ExportDetail = sequelize.define(
       allowNull: false,
       defaultValue: 0,
     },
-    warranty_status: {
+    WarrantyStartTime: { type: DataTypes.DATE, allowNull: true },
+    WarrantyEndTime: { type: DataTypes.DATE, allowNull: true },
+    WarrantyStatus: {
       type: DataTypes.BOOLEAN,
       allowNull: true,
       defaultValue: false,
