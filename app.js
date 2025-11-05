@@ -9,6 +9,7 @@ const userRoutes = require("./routes/userRoute");
 const sequelize = require("./configs/db");
 const activityRoutes = require("./routes/activityRoute");
 const reportRoutes = require("./routes/reportRoute");
+const chartRoutes = require("./routes/chartRoute");
 const cors = require("cors");
 
 const app = express();
@@ -21,6 +22,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/report", reportRoutes);
+app.use("/api/charts", chartRoutes);
 (async () => {
   try {
     await sequelize.authenticate();
