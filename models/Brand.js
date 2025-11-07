@@ -20,16 +20,10 @@ const Brand = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-    CreateAt: {
-      type: DataTypes.DATE,
-    },
-    UpdateAt: {
-      type: DataTypes.DATE,
-    },
   },
   {
     tableName: "Brand",
-    timestamps: false,
+    timestamps: true,
   }
 );
 

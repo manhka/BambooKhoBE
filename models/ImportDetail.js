@@ -1,12 +1,13 @@
+// models/ImportDetail.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../configs/db");
-const CustomerReturnOrder = require("./CustomerReturnOrder");
+const ImportOrder = require("./ImportOrder");
 const Product = require("./Product");
 
-const CustomerReturnDetail = sequelize.define(
-  "CustomerReturnDetail",
+const ImportDetail = sequelize.define(
+  "ImportDetail",
   {
-    CustomerReturnDetailID: {
+    ImportDetailID: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
@@ -15,21 +16,23 @@ const CustomerReturnDetail = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    Reason: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    CustomerReturnOrderID: {
-      type: DataTypes.INTEGER,
+    UnitPrice: {
+      type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
+    },
+    Total: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+    },
+    ImportID: {
+      type: DataTypes.INTEGER,
       references: {
-        model: CustomerReturnOrder,
-        key: "ReturnID",
+        model: ImportOrder,
+        key: "ImportID",
       },
     },
     BarcodeProduct: {
       type: DataTypes.STRING(100),
-      allowNull: false,
       references: {
         model: Product,
         key: "BarcodeProduct",
@@ -37,9 +40,9 @@ const CustomerReturnDetail = sequelize.define(
     },
   },
   {
-    tableName: "CustomerReturnDetail",
+    tableName: "ImportDetail",
     timestamps: false,
   }
 );
 
-module.exports = CustomerReturnDetail;
+module.exports = ImportDetail;

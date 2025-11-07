@@ -1,147 +1,267 @@
+const { sequelize, Product, Variant, Brand, Category } = require("../models");
 const ProductValidator = require("../validators/ProductValidator");
+const VariantValidator = require("../validators/VariantValidator");
 const { Op } = require("sequelize");
-const Brand = require("../models/Brand");
-const Category = require("../models/Category");
-const { Product, Variant } = require("../models");
-exports.createProduct = async (req, res) => {
-  const data = req.body;
-  const { isValid, errors } = ProductValidator.validate(data, false); // false = create
+exports.createProductWithVariants = async (req, res) => {
+  const {
+    BarcodeProduct,
+    ProductName,
+    NumberOfProduct,
+    Image,
+    Description,
+    BrandID,
+    CategoryID,
+    CostPrice,
+    SalePrice,
+    Variants,
+  } = req.body;
 
-  if (!isValid) {
+  //  Step 1: Validate Product
+  const { isValid: isProductValid, errors: productErrors } =
+    ProductValidator.validate(req.body);
+
+  if (!isProductValid) {
     return res.status(400).json({
-      status: "error",
-      message: "invalid_input",
-      errors,
+      message: "Invalid product data",
+      errors: productErrors,
     });
   }
 
-  try {
-    const existing = await Product.findByPk(data.BarcodeProduct);
-    if (existing) {
-      return res.status(409).json({
-        status: "error",
-        message: "product_already_exists",
+  //  Step 2: Validate Variants (nếu có)
+  if (Array.isArray(Variants) && Variants.length > 0) {
+    const variantErrors = [];
+
+    Variants.forEach((variant, index) => {
+      const { isValid, errors } = validateVariantInput(variant);
+      if (!isValid) {
+        variantErrors.push({ index, errors });
+      }
+    });
+
+    if (variantErrors.length > 0) {
+      return res.status(400).json({
+        message: "Invalid variant data",
+        variantErrors,
       });
     }
+  }
 
-    const product = await Product.create(data);
-    res.status(201).json({
-      status: "success",
-      message: "product_created",
-      data: product,
+  //  Step 3: Bắt đầu transaction
+  const transaction = await sequelize.transaction();
+
+  try {
+    //  Tạo Product
+    const product = await Product.create(
+      {
+        BarcodeProduct,
+        ProductName,
+        NumberOfProduct,
+        Image,
+        Description,
+        BrandID,
+        CategoryID,
+        CostPrice,
+        SalePrice,
+      },
+      { transaction }
+    );
+
+    //  Tạo Variants nếu có
+    if (Array.isArray(Variants) && Variants.length > 0) {
+      const variantData = Variants.map((v) => ({
+        AttributeName: v.AttributeName,
+        Value: v.Value,
+        Unit: v.Unit || null,
+        Description: v.Description || null,
+        BarcodeProduct: product.BarcodeProduct,
+      }));
+
+      await Variant.bulkCreate(variantData, { transaction });
+    }
+
+    //  Commit transaction
+    await transaction.commit();
+
+    return res.status(201).json({
+      message: "Product created successfully with variants",
+      product,
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      status: "error",
-      message: "server_error",
+  } catch (error) {
+    //  Rollback nếu lỗi
+    await transaction.rollback();
+    console.error("Error creating product:", error);
+
+    return res.status(500).json({
+      message: "Failed to create product",
+      error: error.message,
     });
   }
 };
 
-exports.updateProduct = async (req, res) => {
+exports.updateProductWithVariants = async (req, res) => {
   const { barcode } = req.params;
-  const data = req.body;
-  const { isValid, errors } = ProductValidator.validate(data, true); // true = update
+  const {
+    ProductName,
+    NumberOfProduct,
+    Image,
+    Description,
+    BrandID,
+    CategoryID,
+    CostPrice,
+    SalePrice,
+    Variants,
+  } = req.body;
 
-  if (!isValid) {
-    return res.status(400).json({
-      status: "error",
-      message: "invalid_input",
-      errors,
-    });
-  }
+  const transaction = await sequelize.transaction();
 
   try {
-    const product = await Product.findByPk(barcode);
-    if (!product) {
-      return res.status(404).json({
-        status: "error",
-        message: "product_not_found",
+    // 1️ Kiểm tra product có tồn tại không
+    const existingProduct = await Product.findByPk(barcode);
+    if (!existingProduct) {
+      await transaction.rollback();
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // 2️ Validate product input
+    const { isValid, errors } = ProductValidator.validate(
+      {
+        BarcodeProduct: barcode,
+        ProductName,
+        BrandID,
+        CategoryID,
+      },
+      true // isUpdate = true
+    );
+
+    if (!isValid) {
+      await transaction.rollback();
+      return res.status(400).json({
+        message: "Invalid product input",
+        errors,
       });
     }
 
-    await product.update(data);
-    res.status(200).json({
-      status: "success",
-      message: "product_updated",
-      data: product,
+    // 3️ Cập nhật product
+    await existingProduct.update(
+      {
+        ProductName,
+        NumberOfProduct,
+        Image,
+        Description,
+        BrandID,
+        CategoryID,
+        CostPrice,
+        SalePrice,
+        UpdateAt: new Date(),
+      },
+      { transaction }
+    );
+
+    // 4️ Xử lý cập nhật variants (nếu có)
+    if (Array.isArray(Variants)) {
+      // Xóa hết variants cũ rồi thêm lại (đơn giản, tránh lỗi mismatch)
+      await Variant.destroy({
+        where: { BarcodeProduct: barcode },
+        transaction,
+      });
+
+      // Validate từng variant
+      for (const v of Variants) {
+        const { isValid: validV, errors: errorsV } =
+          VariantValidator.validateVariantInput(v, true);
+        if (!validV) {
+          await transaction.rollback();
+          return res.status(400).json({
+            message: "Invalid variant input",
+            errors: errorsV,
+          });
+        }
+      }
+
+      // Tạo lại danh sách variants
+      const newVariants = Variants.map((v) => ({
+        AttributeName: v.AttributeName,
+        Value: v.Value,
+        Unit: v.Unit || null,
+        Description: v.Description || null,
+        BarcodeProduct: barcode,
+      }));
+
+      await Variant.bulkCreate(newVariants, { transaction });
+    }
+
+    // 5️ Commit nếu mọi thứ OK
+    await transaction.commit();
+
+    return res.status(200).json({
+      message: "Product updated successfully with variants",
+      product: existingProduct,
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      status: "error",
-      message: "server_error",
+  } catch (error) {
+    await transaction.rollback();
+    console.error("Error updating product:", error);
+    return res.status(500).json({
+      message: "Failed to update product",
+      error: error.message,
     });
   }
 };
-exports.getProducts = async (req, res) => {
-  try {
-    const { keyword, brand, category } = req.query;
 
-    // --- Where cho Product ---
-    const productConditions = {};
-    if (keyword) {
-      productConditions[Op.or] = [
-        { BarcodeProduct: { [Op.like]: `%${keyword}%` } },
-        { ProductName: { [Op.like]: `%${keyword}%` } },
+exports.getAllProducts = async (req, res) => {
+  try {
+    const { keyword, BrandID, CategoryID } = req.query;
+
+    console.log("===== 🟢 INPUT QUERY PARAMS =====");
+    console.log("keyword:", keyword);
+    console.log("BrandID:", BrandID);
+    console.log("CategoryID:", CategoryID);
+
+    const whereClause = {};
+
+    // 🔹 Lọc theo Brand và Category nếu có
+    if (BrandID) whereClause.BrandID = Number(BrandID);
+    if (CategoryID) whereClause.CategoryID = Number(CategoryID);
+
+    // 🔹 Nếu có keyword → tìm trong ProductName hoặc BarcodeProduct
+    if (keyword && keyword.trim() !== "") {
+      whereClause[Op.or] = [
+        { ProductName: { [Op.like]: `%${keyword.trim()}%` } },
+        { BarcodeProduct: { [Op.like]: `%${keyword.trim()}%` } },
       ];
     }
 
-    // --- Where cho Brand ---
-    const brandConditions = {};
-    if (brand) {
-      brandConditions.BrandName = { [Op.like]: `%${brand}%` };
-    }
+    console.log("===== 🟡 WHERE CLAUSE BUILT =====");
+    console.log(whereClause);
 
-    // --- Where cho Category ---
-    const categoryConditions = {};
-    if (category) {
-      categoryConditions.CategoryName = { [Op.like]: `%${category}%` };
-    }
-
-    // --- Truy vấn ---
+    // ✅ Truy vấn
     const products = await Product.findAll({
-      where: productConditions,
+      where: whereClause,
       include: [
         {
           model: Brand,
-          attributes: ["BrandName"],
-          where: Object.keys(brandConditions).length
-            ? brandConditions
-            : undefined,
-          required: false,
+          attributes: ["BrandID", "BrandName"],
         },
         {
           model: Category,
-          attributes: ["CategoryName"],
-          where: Object.keys(categoryConditions).length
-            ? categoryConditions
-            : undefined,
-          required: false,
+          attributes: ["CategoryID", "CategoryName"],
         },
       ],
-      order: [["CreateAt", "DESC"]],
+      order: [["createdAt", "DESC"]],
     });
 
-    if (products.length === 0) {
-      return res.status(404).json({
-        status: "error",
-        message: "product_not_found",
-      });
-    }
+    console.log("===== 🔵 QUERY RESULT =====");
+    console.log("Total products found:", products.length);
 
     res.status(200).json({
-      status: "success",
-      message: "fetch_success",
+      success: true,
       count: products.length,
       data: products,
     });
   } catch (error) {
-    console.error("Get Products Error:", error);
+    console.error("❌ Error fetching products:", error);
     res.status(500).json({
-      status: "error",
-      message: "server_error",
+      success: false,
+      message: "Lỗi khi lấy danh sách sản phẩm",
     });
   }
 };
@@ -211,7 +331,7 @@ exports.getLowStockProducts = async (req, res) => {
   }
 };
 
-exports.viewProductDetails = async (req, res) => {
+exports.getProductDetail = async (req, res) => {
   const { barcode } = req.params;
 
   try {
@@ -219,32 +339,42 @@ exports.viewProductDetails = async (req, res) => {
       where: { BarcodeProduct: barcode },
       include: [
         {
+          model: Brand,
+          as: "Brand",
+          attributes: ["BrandID", "BrandName"],
+        },
+        {
+          model: Category,
+          as: "Category",
+          attributes: ["CategoryID", "CategoryName"],
+        },
+        {
           model: Variant,
+          as: "Variants",
           attributes: [
             "VariantID",
             "AttributeName",
             "Value",
             "Unit",
             "Description",
-            "createdAt",
-            "updatedAt",
           ],
         },
       ],
     });
 
     if (!product) {
-      return res
-        .status(404)
-        .json({ status: "error", message: "product_not_found" });
+      return res.status(404).json({ message: "Product not found" });
     }
 
-    res.json({
-      status: "success",
-      data: product,
+    return res.status(200).json({
+      message: "Product detail retrieved successfully",
+      product,
     });
-  } catch (err) {
-    console.error("Error fetching product details:", err);
-    res.status(500).json({ status: "error", message: "server_error" });
+  } catch (error) {
+    console.error("Error fetching product detail:", error);
+    return res.status(500).json({
+      message: "Failed to fetch product detail",
+      error: error.message,
+    });
   }
 };
