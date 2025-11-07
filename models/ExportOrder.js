@@ -1,7 +1,5 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../configs/db");
-const User = require("./User");
-const Customer = require("./Customer");
 
 const ExportOrder = sequelize.define(
   "ExportOrder",
@@ -21,17 +19,11 @@ const ExportOrder = sequelize.define(
     },
     UserID: {
       type: DataTypes.INTEGER,
-      references: {
-        model: "User",
-        key: "UserID",
-      },
+      allowNull: true,
     },
     CustomerID: {
       type: DataTypes.INTEGER,
-      references: {
-        model: "Customer",
-        key: "CustomerID",
-      },
+      allowNull: true,
     },
   },
   {
@@ -39,8 +31,5 @@ const ExportOrder = sequelize.define(
     timestamps: false,
   }
 );
-
-ExportOrder.belongsTo(User, { foreignKey: "UserID" });
-ExportOrder.belongsTo(Customer, { foreignKey: "CustomerID" });
 
 module.exports = ExportOrder;

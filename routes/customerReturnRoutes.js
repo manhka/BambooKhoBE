@@ -1,6 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const customerReturnController = require("../controllers/CustomerReturnController");
+router.get("/warranty", customerReturnController.getWarrantyProducts);
+router.get(
+  "/warranty/:exportDetailId",
+  customerReturnController.getWarrantyProductById
+);
 
 router.post("/create", customerReturnController.createCustomerReturn);
 

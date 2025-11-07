@@ -2,6 +2,7 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../configs/db");
 const Brand = require("./Brand");
 const Category = require("./Category");
+const Variant = require("./Variant");
 
 const Product = sequelize.define(
   "Product",
@@ -23,15 +24,12 @@ const Product = sequelize.define(
     Image: {
       type: DataTypes.STRING(250),
     },
+    Description: {
+      type: DataTypes.TEXT,
+    },
     IsArchive: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
-    },
-    CreateAt: {
-      type: DataTypes.DATE,
-    },
-    UpdateAt: {
-      type: DataTypes.DATE,
     },
     BrandID: {
       type: DataTypes.INTEGER,
@@ -47,14 +45,21 @@ const Product = sequelize.define(
         key: "CategoryID",
       },
     },
+    CostPrice: {
+      type: DataTypes.DECIMAL(15, 2),
+      allowNull: false,
+      defaultValue: 0.0,
+    },
+    SalePrice: {
+      type: DataTypes.DECIMAL(15, 2),
+      allowNull: false,
+      defaultValue: 0.0,
+    },
   },
   {
     tableName: "Product",
-    timestamps: false,
+    timestamps: true,
   }
 );
-
-Product.belongsTo(Brand, { foreignKey: "BrandID" });
-Product.belongsTo(Category, { foreignKey: "CategoryID" });
 
 module.exports = Product;
