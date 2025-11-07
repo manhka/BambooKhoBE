@@ -1,10 +1,10 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../configs/db");
+const ImportOrder = require("./ImportOrder");
 const User = require("./User");
-const ExportOrder = require("./ExportOrder");
 
-const CustomerReturnOrder = sequelize.define(
-  "CustomerReturnOrder",
+const SupplierReturnOrder = sequelize.define(
+  "SupplierReturnOrder",
   {
     ReturnID: {
       type: DataTypes.INTEGER,
@@ -19,25 +19,25 @@ const CustomerReturnOrder = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    ImportID: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: ImportOrder,
+        key: "ImportID",
+      },
+    },
     UserID: {
       type: DataTypes.INTEGER,
       references: {
-        model: "User",
+        model: User,
         key: "UserID",
-      },
-    },
-    ExportID: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: "ExportOrder",
-        key: "ExportID",
       },
     },
   },
   {
-    tableName: "CustomerReturnOrder",
+    tableName: "SupplierReturnOrder",
     timestamps: false,
   }
 );
 
-module.exports = CustomerReturnOrder;
+module.exports = SupplierReturnOrder;

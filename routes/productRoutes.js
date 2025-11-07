@@ -3,10 +3,10 @@ const router = express.Router();
 const productController = require("../controllers/ProductController");
 
 // POST /api/products/create
-router.post("/create", productController.createProduct);
-router.put("/update/:barcode", productController.updateProduct);
-router.get("/", productController.getProducts);
-router.patch("/:barcode/archive", productController.archiveProduct);
+router.post("/create", productController.createProductWithVariants);
+router.put("/update/:barcode", productController.updateProductWithVariants);
+router.get("/", productController.getAllProducts);
+router.patch("/archive/:barcode", productController.archiveProduct);
 router.get("/stock/warning", productController.getLowStockProducts);
-router.get("/details/:barcode", productController.viewProductDetails);
+router.get("/details/:barcode", productController.getProductDetail);
 module.exports = router;

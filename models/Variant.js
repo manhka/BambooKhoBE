@@ -15,12 +15,12 @@ const Variant = sequelize.define(
       allowNull: false,
     },
     Value: {
-      type: DataTypes.DOUBLE,
-      allowNull: false,
+      type: DataTypes.STRING(250),
+      allowNull: true,
     },
     Unit: {
       type: DataTypes.STRING(50),
-      allowNull: false,
+      allowNull: true,
     },
     Description: {
       type: DataTypes.STRING(500),
@@ -39,13 +39,8 @@ const Variant = sequelize.define(
   },
   {
     tableName: "Variant",
-    timestamps: true,
+    timestamps: false,
   }
 );
-
-Variant.belongsTo(Product, {
-  foreignKey: "BarcodeProduct",
-  targetKey: "BarcodeProduct",
-});
 
 module.exports = Variant;
