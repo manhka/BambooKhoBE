@@ -4,10 +4,10 @@ const bodyParser = require("body-parser");
 const productRoutes = require("./routes/productRoutes");
 const variantRoutes = require("./routes/variantRoutes");
 const customerReturnRoutes = require("./routes/customerReturnRoutes");
+const userRoutes = require("./routes/userRoute");
 const categoryRoutes = require("./routes/categoryRoutes");
 const brandRoutes = require("./routes/brandRoutes");
 const customerRoutes = require("./routes/customerRoutes");
-
 const authRoutes = require("./routes/authRoutes");
 const sequelize = require("./configs/db");
 const cors = require("cors");
@@ -15,6 +15,8 @@ const cors = require("cors");
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/variants", variantRoutes);
@@ -31,5 +33,5 @@ app.use("/api/customers", customerRoutes);
   }
 })();
 
-const PORT = process.env.PORT || 3000;
+const PORT = 3001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
