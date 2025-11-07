@@ -1,4 +1,3 @@
-// models/ImportDetail.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../configs/db");
 const ImportOrder = require("./ImportOrder");
