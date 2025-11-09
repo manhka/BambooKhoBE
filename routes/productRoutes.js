@@ -11,6 +11,7 @@ router.get("/stock/list-warning", productController.getLowStockProducts);
 router.get("/stock/number-warning", productController.getLowStockCount);
 router.get("/stock/number-product", productController.getTotalProducts);
 router.get("/details/:barcode", productController.getProductDetail);
+router.get("/all-for-lookup", productController.getProductsForLookup);
 // doanh thu tháng
 router.get("/monthly-revenue", productController.getMonthlyRevenue);
 module.exports = router;

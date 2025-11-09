@@ -445,6 +445,7 @@ exports.getProductDetail = async (req, res) => {
   }
 };
 
+<<<<<<< HEAD
 // doanh thu tháng
 const { ExportOrder } = require("../models");
 exports.getMonthlyRevenue = async (req, res) => {
@@ -484,4 +485,34 @@ exports.getMonthlyRevenue = async (req, res) => {
       message: "failed_to_calculate_monthly_revenue",
     });
   }
+=======
+exports.getProductsForLookup = async (req, res) => {
+    try {
+        const products = await Product.findAll({
+            attributes: ['BarcodeProduct', 'ProductName', 'NumberOfProduct', 'SalePrice', 'CostPrice'], 
+            include: [
+                {
+                    model: Brand,
+                    as: 'Brand', 
+                    attributes: ['BrandName'],
+                }
+            ],
+            order: [['ProductName', 'ASC']]
+        });
+
+        if (products.length === 0) {
+            return res.status(404).json({ message: "Không tìm thấy bất kỳ sản phẩm nào trong hệ thống." });
+        }
+
+        return res.status(200).json({
+            status: "success",
+            message: "All product barcodes fetched successfully",
+            data: products, 
+        });
+
+    } catch (error) {
+        console.error("Get Products For Lookup Error:", error);
+        return res.status(500).json({ message: "Server error", error: error.message });
+    }
+>>>>>>> 79425385f282f01c7d3e32b910c542a20ad5a2e1
 };
