@@ -24,10 +24,10 @@ const Activity = require("./Activity");
    1. CATEGORY / BRAND / PRODUCT / VARIANT
    =========================================================== */
 Category.hasMany(Product, { foreignKey: "CategoryID" });
-Product.belongsTo(Category, { foreignKey: "CategoryID" });
+Product.belongsTo(Category, { foreignKey: "CategoryID", as: 'Category' }); 
 
-Brand.hasMany(Product, { foreignKey: "BrandID" });
-Product.belongsTo(Brand, { foreignKey: "BrandID" });
+Brand.hasMany(Product, { foreignKey: "BrandID", as: 'Products' }); 
+Product.belongsTo(Brand, { foreignKey: "BrandID", as: 'Brand' });
 
 Product.hasMany(Variant, { foreignKey: "BarcodeProduct" });
 Variant.belongsTo(Product, { foreignKey: "BarcodeProduct" });

@@ -13,6 +13,7 @@ const customerRoutes = require('./routes/customerRoutes');
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require("./routes/authRoutes");
 const sequelize = require("./configs/db");
+const supplierRoutes = require('./routes/supplierRoutes');
 const cors = require("cors");
 
 const app = express();
@@ -28,6 +29,7 @@ app.use('/api/import-orders', importRoutes);
 app.use('/api/export-orders', exportRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/suppliers', supplierRoutes);
 
 (async () => {
   try {
