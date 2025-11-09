@@ -7,6 +7,10 @@ router.post("/create", productController.createProductWithVariants);
 router.put("/update/:barcode", productController.updateProductWithVariants);
 router.get("/", productController.getAllProducts);
 router.patch("/archive/:barcode", productController.archiveProduct);
-router.get("/stock/warning", productController.getLowStockProducts);
+router.get("/stock/list-warning", productController.getLowStockProducts);
+router.get("/stock/number-warning", productController.getLowStockCount);
+router.get("/stock/number-product", productController.getTotalProducts);
 router.get("/details/:barcode", productController.getProductDetail);
+// doanh thu tháng
+router.get("/monthly-revenue", productController.getMonthlyRevenue);
 module.exports = router;

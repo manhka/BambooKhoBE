@@ -211,11 +211,6 @@ exports.getAllProducts = async (req, res) => {
   try {
     const { keyword, BrandID, CategoryID } = req.query;
 
-    console.log("===== 🟢 INPUT QUERY PARAMS =====");
-    console.log("keyword:", keyword);
-    console.log("BrandID:", BrandID);
-    console.log("CategoryID:", CategoryID);
-
     const whereClause = {};
 
     // 🔹 Lọc theo Brand và Category nếu có
@@ -299,16 +294,86 @@ exports.archiveProduct = async (req, res) => {
     });
   }
 };
-
-exports.getLowStockProducts = async (req, res) => {
+exports.getLowStockCount = async (req, res) => {
   try {
-    const threshold = parseInt(req.query.threshold) || 5;
+    const threshold = 5;
 
-    const products = await Product.findAll({
+    const count = await Product.count({
       where: {
         NumberOfProduct: { [Op.lte]: threshold },
         IsArchive: false,
       },
+    });
+
+    return res.status(200).json({
+      status: "success",
+      message: "low_stock_count_retrieved",
+      threshold,
+      count,
+    });
+  } catch (error) {
+    console.error("Error fetching low stock count:", error);
+    res.status(500).json({
+      status: "error",
+      message: "failed_to_retrieve_low_stock_count",
+    });
+  }
+};
+exports.getTotalProducts = async (req, res) => {
+  try {
+    // lấy tất cả sản phẩm đang kinh doanh
+    const products = await Product.findAll({
+      where: {
+        IsArchive: false,
+      },
+      attributes: ["NumberOfProduct"],
+    });
+
+    // tính tổng số lượng
+    const totalProducts = products.reduce(
+      (acc, p) => acc + (p.NumberOfProduct || 0),
+      0
+    );
+
+    res.status(200).json({
+      status: "success",
+      message: "total_products_calculated",
+      totalProducts,
+    });
+  } catch (error) {
+    console.error("Error calculating total products:", error);
+    res.status(500).json({
+      status: "error",
+      message: "failed_to_calculate_total_products",
+    });
+  }
+};
+exports.getLowStockProducts = async (req, res) => {
+  try {
+    const threshold = 5;
+    const { keyword, BrandID, CategoryID } = req.query;
+
+    // build điều kiện where
+    const whereClause = {
+      NumberOfProduct: { [Op.lte]: threshold },
+      IsArchive: false,
+    };
+
+    // lọc theo BrandID / CategoryID nếu có
+    if (BrandID) whereClause.BrandID = Number(BrandID);
+    if (CategoryID) whereClause.CategoryID = Number(CategoryID);
+
+    // tìm theo keyword nếu có
+    if (keyword && keyword.trim() !== "") {
+      whereClause[Op.or] = [
+        { ProductName: { [Op.like]: `%${keyword.trim()}%` } },
+        { BarcodeProduct: { [Op.like]: `%${keyword.trim()}%` } },
+      ];
+    }
+
+    // query
+    const products = await Product.findAll({
+      where: whereClause,
       include: [
         { model: Brand, attributes: ["BrandName"] },
         { model: Category, attributes: ["CategoryName"] },
@@ -320,6 +385,7 @@ exports.getLowStockProducts = async (req, res) => {
       status: "success",
       message: "low_stock_products_retrieved",
       threshold,
+      count: products.length,
       data: products,
     });
   } catch (error) {
@@ -375,6 +441,47 @@ exports.getProductDetail = async (req, res) => {
     return res.status(500).json({
       message: "Failed to fetch product detail",
       error: error.message,
+    });
+  }
+};
+
+// doanh thu tháng
+const { ExportOrder } = require("../models");
+exports.getMonthlyRevenue = async (req, res) => {
+  try {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0-11
+
+    // ngày đầu tháng
+    const startDate = new Date(currentYear, currentMonth, 1);
+    // ngày cuối tháng
+    const endDate = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59);
+
+    // lấy tất cả export order trong tháng
+    const exportOrders = await ExportOrder.findAll({
+      where: {
+        ExportDate: { [Op.between]: [startDate, endDate] },
+      },
+      attributes: ["Total"],
+    });
+
+    // tính tổng doanh thu
+    const totalRevenue = exportOrders.reduce(
+      (acc, order) => acc + parseFloat(order.Total || 0),
+      0
+    );
+
+    res.status(200).json({
+      status: "success",
+      message: "monthly_revenue_calculated",
+      totalRevenue,
+    });
+  } catch (error) {
+    console.error("Error calculating monthly revenue:", error);
+    res.status(500).json({
+      status: "error",
+      message: "failed_to_calculate_monthly_revenue",
     });
   }
 };
