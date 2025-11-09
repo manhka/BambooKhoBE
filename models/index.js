@@ -6,6 +6,8 @@ const Product = require("./Product");
 const Variant = require("./Variant");
 const Category = require("./Category");
 const Brand = require("./Brand");
+const Customer = require("./Customer");
+
 const User = require("./User");
 const Customer = require("./Customer");
 const ExportOrder = require("./ExportOrder");
@@ -40,6 +42,11 @@ ExportOrder.belongsTo(Customer, { foreignKey: "CustomerID", as: 'Customer' });
 
 User.hasMany(ExportOrder, { foreignKey: "UserID", as: 'CreatedExportOrders' }); 
 ExportOrder.belongsTo(User, { foreignKey: "UserID", as: 'User' }); 
+User.hasMany(ExportOrder, { foreignKey: "UserID" });
+ExportOrder.belongsTo(User, { foreignKey: "UserID" });
+ExportOrder.belongsTo(Customer, { as: "Customer", foreignKey: "CustomerID" });
+ExportOrder.hasMany(ExportDetail, { foreignKey: "ExportID" });
+ExportDetail.belongsTo(ExportOrder, { foreignKey: "ExportID" });
 
 ExportOrder.hasMany(ExportDetail, { foreignKey: "ExportID", as: 'ExportDetails' }); 
 ExportDetail.belongsTo(ExportOrder, { foreignKey: "ExportID", as: 'ExportOrder' });
@@ -57,14 +64,23 @@ ExportOrder.hasMany(CustomerReturnOrder, { foreignKey: "ExportID" });
 CustomerReturnOrder.belongsTo(ExportOrder, { foreignKey: "ExportID" });
 
 CustomerReturnOrder.hasMany(CustomerReturnDetail, {
-  foreignKey: "CustomerReturnOrderID",
-});
-CustomerReturnDetail.belongsTo(CustomerReturnOrder, {
+  as: "CustomerReturnDetails",
   foreignKey: "CustomerReturnOrderID",
 });
 
-Product.hasMany(CustomerReturnDetail, { foreignKey: "BarcodeProduct" });
-CustomerReturnDetail.belongsTo(Product, { foreignKey: "BarcodeProduct" });
+CustomerReturnDetail.belongsTo(CustomerReturnOrder, {
+  as: "CustomerReturnOrder",
+  foreignKey: "CustomerReturnOrderID",
+});
+
+Product.hasMany(CustomerReturnDetail, {
+  as: "CustomerReturnDetail",
+  foreignKey: "BarcodeProduct",
+});
+CustomerReturnDetail.belongsTo(Product, {
+  as: "Product",
+  foreignKey: "BarcodeProduct",
+});
 
 /* ===========================================================
    4. IMPORT ORDER / DETAIL
@@ -126,6 +142,7 @@ module.exports = {
   User,
   ExportOrder,
   ExportDetail,
+  Customer,
   CustomerReturnOrder,
   CustomerReturnDetail,
   ImportOrder,

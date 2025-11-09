@@ -7,5 +7,6 @@ router.get('/', verifyToken, customerController.getAllCustomers);
 router.post('/', verifyToken, customerController.createCustomer);
 router.get('/detail/:id', verifyToken, customerController.getCustomerDetail);
 router.put('/update/:id', verifyToken, customerController.updateCustomer);
+router.get("/search", customerController.searchCustomers);
 
 module.exports = router;

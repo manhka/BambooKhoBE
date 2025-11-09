@@ -16,7 +16,7 @@ const Variant = sequelize.define(
     },
     Value: {
       type: DataTypes.STRING(250),
-      allowNull: false,
+      allowNull: true,
     },
     Unit: {
       type: DataTypes.STRING(50),

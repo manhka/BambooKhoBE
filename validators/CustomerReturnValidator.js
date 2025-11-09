@@ -41,62 +41,61 @@ exports.validateCustomerReturnInput = async (data, isUpdate = false) => {
   }
 
   // Validate Details
-  if (!isUpdate || data.Details !== undefined) {
-    if (!Array.isArray(data.Details) || data.Details.length === 0) {
-      errors.Details = "Details must be a non-empty array";
+  const validateCustomerReturnInput = async (data) => {
+    const errors = {};
+
+    if (!data.ReturnDate || isNaN(new Date(data.ReturnDate))) {
+      errors.ReturnDate = "ReturnDate is required and must be a valid date";
+    }
+
+    if (!data.UserID) {
+      errors.UserID = "UserID is required";
+    }
+
+    if (!data.ExportID) {
+      errors.ExportID = "ExportID is required";
+    }
+
+    if (!data.BarcodeProduct || data.BarcodeProduct.trim() === "") {
+      errors.BarcodeProduct = "BarcodeProduct is required";
     } else {
-      for (let i = 0; i < data.Details.length; i++) {
-        const detail = data.Details[i];
+      const product = await Product.findByPk(data.BarcodeProduct);
+      if (!product) {
+        errors.BarcodeProduct = `Product ${data.BarcodeProduct} does not exist`;
+      }
 
-        if (!detail.BarcodeProduct || detail.BarcodeProduct.trim() === "") {
-          errors[`Details[${i}].BarcodeProduct`] = "BarcodeProduct is required";
-          continue;
-        }
+      const exportDetail = await ExportDetail.findOne({
+        where: {
+          ExportID: data.ExportID,
+          BarcodeProduct: data.BarcodeProduct,
+        },
+      });
 
-        const product = await Product.findByPk(detail.BarcodeProduct);
-        if (!product) {
-          errors[
-            `Details[${i}].BarcodeProduct`
-          ] = `Product ${detail.BarcodeProduct} does not exist`;
-          continue;
-        }
-
-        if (data.ExportID) {
-          const exportDetail = await ExportDetail.findOne({
-            where: {
-              ExportID: data.ExportID,
-              BarcodeProduct: detail.BarcodeProduct,
-            },
-          });
-          if (!exportDetail) {
-            errors[
-              `Details[${i}].BarcodeProduct`
-            ] = `Product ${detail.BarcodeProduct} was not included in ExportID ${data.ExportID}`;
-            continue;
-          }
-
-          if (
-            detail.Quantity === undefined ||
-            detail.Quantity === null ||
-            !Number.isInteger(detail.Quantity) ||
-            detail.Quantity <= 0
-          ) {
-            errors[`Details[${i}].Quantity`] =
-              "Quantity is required and must be a positive integer";
-          } else if (detail.Quantity > exportDetail.Quantity) {
-            errors[
-              `Details[${i}].Quantity`
-            ] = `Quantity to return (${detail.Quantity}) cannot exceed quantity exported (${exportDetail.Quantity})`;
-          }
-        }
-
-        if (detail.Reason && detail.Reason.length > 500) {
-          errors[`Details[${i}].Reason`] =
-            "Reason must be under 500 characters";
+      if (!exportDetail) {
+        errors.BarcodeProduct = `Product ${data.BarcodeProduct} was not included in ExportID ${data.ExportID}`;
+      } else {
+        const maxReturnable =
+          (exportDetail.Quantity || 0) - (exportDetail.ReturnedQuantity || 0);
+        if (!Number.isInteger(data.Quantity) || data.Quantity <= 0) {
+          errors.Quantity =
+            "Quantity is required and must be a positive integer";
+        } else if (data.Quantity > maxReturnable) {
+          errors.Quantity = `Quantity to return (${data.Quantity}) cannot exceed quantity available (${maxReturnable})`;
         }
       }
     }
-  }
+
+    if (data.Reason && data.Reason.length > 500) {
+      errors.Reason = "Reason must be under 500 characters";
+    }
+
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors,
+    };
+  };
+
+  module.exports = validateCustomerReturnInput;
 
   // Validate main Reason
   if (data.Reason && data.Reason.length > 500) {
