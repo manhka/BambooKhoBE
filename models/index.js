@@ -7,6 +7,7 @@ const Variant = require("./Variant");
 const Category = require("./Category");
 const Brand = require("./Brand");
 const User = require("./User");
+const Customer = require("./Customer");
 const ExportOrder = require("./ExportOrder");
 const ExportDetail = require("./ExportDetail");
 const CustomerReturnOrder = require("./CustomerReturnOrder");
@@ -16,6 +17,8 @@ const ImportDetail = require("./ImportDetail");
 const Supplier = require("./Supplier");
 const SupplierReturnOrder = require("./SupplierReturnOrder");
 const SupplierReturnDetail = require("./SupplierReturnDetail");
+const StaffActivity = require("./StaffActivity");
+const Activity = require("./Activity");
 
 /* ===========================================================
    1. CATEGORY / BRAND / PRODUCT / VARIANT
@@ -32,14 +35,17 @@ Variant.belongsTo(Product, { foreignKey: "BarcodeProduct" });
 /* ===========================================================
    2. EXPORT ORDER / DETAIL
    =========================================================== */
-User.hasMany(ExportOrder, { foreignKey: "UserID" });
-ExportOrder.belongsTo(User, { foreignKey: "UserID" });
+Customer.hasMany(ExportOrder, { foreignKey: "CustomerID", as: 'ExportOrders' });
+ExportOrder.belongsTo(Customer, { foreignKey: "CustomerID", as: 'Customer' }); 
 
-ExportOrder.hasMany(ExportDetail, { foreignKey: "ExportID" });
-ExportDetail.belongsTo(ExportOrder, { foreignKey: "ExportID" });
+User.hasMany(ExportOrder, { foreignKey: "UserID", as: 'CreatedExportOrders' }); 
+ExportOrder.belongsTo(User, { foreignKey: "UserID", as: 'User' }); 
 
-Product.hasMany(ExportDetail, { foreignKey: "BarcodeProduct" });
-ExportDetail.belongsTo(Product, { foreignKey: "BarcodeProduct" });
+ExportOrder.hasMany(ExportDetail, { foreignKey: "ExportID", as: 'ExportDetails' }); 
+ExportDetail.belongsTo(ExportOrder, { foreignKey: "ExportID", as: 'ExportOrder' });
+
+Product.hasMany(ExportDetail, { foreignKey: "BarcodeProduct", as: 'ExportDetails' }); 
+ExportDetail.belongsTo(Product, { foreignKey: "BarcodeProduct", as: 'Product' }); 
 
 /* ===========================================================
    3. CUSTOMER RETURN ORDER / DETAIL
@@ -63,17 +69,17 @@ CustomerReturnDetail.belongsTo(Product, { foreignKey: "BarcodeProduct" });
 /* ===========================================================
    4. IMPORT ORDER / DETAIL
    =========================================================== */
-Supplier.hasMany(ImportOrder, { foreignKey: "SupplierID" });
-ImportOrder.belongsTo(Supplier, { foreignKey: "SupplierID" });
+Supplier.hasMany(ImportOrder, { foreignKey: "SupplierID", as: 'ImportOrders' }); 
+ImportOrder.belongsTo(Supplier, { foreignKey: "SupplierID", as: 'Supplier' });
 
-User.hasMany(ImportOrder, { foreignKey: "UserID" });
-ImportOrder.belongsTo(User, { foreignKey: "UserID" });
+User.hasMany(ImportOrder, { foreignKey: "UserID", as: 'CreatedImportOrders' }); 
+ImportOrder.belongsTo(User, { foreignKey: "UserID", as: 'User' }); 
 
-ImportOrder.hasMany(ImportDetail, { foreignKey: "ImportID" });
-ImportDetail.belongsTo(ImportOrder, { foreignKey: "ImportID" });
+ImportOrder.hasMany(ImportDetail, { foreignKey: "ImportID", as: 'ImportDetails' }); 
+ImportDetail.belongsTo(ImportOrder, { foreignKey: "ImportID", as: 'ImportOrder' }); 
 
-Product.hasMany(ImportDetail, { foreignKey: "BarcodeProduct" });
-ImportDetail.belongsTo(Product, { foreignKey: "BarcodeProduct" });
+Product.hasMany(ImportDetail, { foreignKey: "BarcodeProduct", as: 'ImportDetails' }); 
+ImportDetail.belongsTo(Product, { foreignKey: "BarcodeProduct", as: 'Product' }); 
 
 /* ===========================================================
    5. SUPPLIER RETURN ORDER / DETAIL
@@ -99,12 +105,22 @@ Product.hasMany(SupplierReturnDetail, { foreignKey: "BarcodeProduct" });
 SupplierReturnDetail.belongsTo(Product, { foreignKey: "BarcodeProduct" });
 
 /* ===========================================================
+   6. AUDIT (STAFF ACTIVITY) 
+   =========================================================== */
+User.hasMany(StaffActivity, { foreignKey: "UserID", as: 'StaffActivities' });
+StaffActivity.belongsTo(User, { foreignKey: "UserID", as: 'User' });
+
+Activity.hasMany(StaffActivity, { foreignKey: "ActivityID", as: 'ActivityLogs' });
+StaffActivity.belongsTo(Activity, { foreignKey: "ActivityID", as: 'ActivityType' });
+
+/* ===========================================================
     EXPORT ALL
    =========================================================== */
 module.exports = {
   sequelize,
   Product,
   Variant,
+  Customer,
   Category,
   Brand,
   User,
@@ -117,4 +133,6 @@ module.exports = {
   Supplier,
   SupplierReturnOrder,
   SupplierReturnDetail,
+  StaffActivity,
+  Activity,
 };

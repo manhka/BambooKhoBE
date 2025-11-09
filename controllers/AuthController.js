@@ -50,13 +50,7 @@ exports.login = async (req, res) => {
       return res.status(404).json({ message: "Không tìm thấy tài khoản" });
     }
 
-    let isMatch = false;
-
-    if (user.RoleID === 1) {
-      isMatch = password === user.Password;
-    } else {
-      isMatch = await bcrypt.compare(password, user.Password);
-    }
+    const isMatch = await bcrypt.compare(password, user.Password);
 
     if (!isMatch) {
       return res.status(401).json({ message: "Sai mật khẩu" });
@@ -64,7 +58,7 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign(
       { userId: user.UserID, roleID: user.RoleID },
-      "123456789abcdef",
+      process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 

@@ -1,5 +1,8 @@
 const jwt = require("jsonwebtoken");
 const pool = require("../configs/db");
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
 exports.verifyToken = async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
@@ -9,7 +12,7 @@ exports.verifyToken = async (req, res, next) => {
       .json({ message: "Không có token, vui lòng đăng nhập" });
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "secretkey");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
     next();
   } catch (err) {
@@ -38,3 +41,5 @@ exports.verifyAdmin = async (req, res, next) => {
     res.status(500).json({ message: "Lỗi server", error: err.message });
   }
 };
+
+
