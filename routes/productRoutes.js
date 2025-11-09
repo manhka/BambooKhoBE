@@ -9,4 +9,5 @@ router.get("/", productController.getAllProducts);
 router.patch("/archive/:barcode", productController.archiveProduct);
 router.get("/stock/warning", productController.getLowStockProducts);
 router.get("/details/:barcode", productController.getProductDetail);
+router.get('/all-for-lookup', productController.getProductsForLookup);
 module.exports = router;

@@ -1,4 +1,5 @@
 const { Sequelize } = require("sequelize");
+require("dotenv").config(); 
 
 const sequelize = new Sequelize("bambookho", "root", "Nghiatai11x@", {
   host: "localhost",

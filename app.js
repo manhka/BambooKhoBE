@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+require('./models');
 const bodyParser = require("body-parser");
 const productRoutes = require("./routes/productRoutes");
 const variantRoutes = require("./routes/variantRoutes");
@@ -7,6 +8,13 @@ const customerReturnRoutes = require("./routes/customerReturnRoutes");
 const userRoutes = require("./routes/userRoute");
 const categoryRoutes = require("./routes/categoryRoutes");
 const brandRoutes = require("./routes/brandRoutes");
+const importRoutes = require('./routes/importRoutes');
+const exportRoutes = require('./routes/exportRoutes');
+const customerRoutes = require('./routes/customerRoutes');
+const userRoutes = require('./routes/userRoutes');
+const authRoutes = require("./routes/authRoutes");
+const sequelize = require("./configs/db");
+const supplierRoutes = require('./routes/supplierRoutes');
 const customerRoutes = require("./routes/customerRoutes");
 const authRoutes = require("./routes/authRoutes");
 const sequelize = require("./configs/db");
@@ -16,8 +24,8 @@ const chartRoutes = require("./routes/chartRoute");
 const cors = require("cors");
 
 const app = express();
-app.use(bodyParser.json());
 app.use(cors());
+app.use(bodyParser.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
@@ -31,7 +39,12 @@ app.use("/api/report", reportRoutes);
 app.use("/api/charts", chartRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/brands", brandRoutes);
-app.use("/api/customers", customerRoutes);
+app.use('/api/import-orders', importRoutes);
+app.use('/api/export-orders', exportRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/suppliers', supplierRoutes);
+
 (async () => {
   try {
     await sequelize.authenticate();
