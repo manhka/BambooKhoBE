@@ -1,15 +1,14 @@
 // models/index.js
 const sequelize = require("../configs/db");
 
-// 🔹 Import các model
+// MODELS
 const Product = require("./Product");
 const Variant = require("./Variant");
 const Category = require("./Category");
 const Brand = require("./Brand");
 const Customer = require("./Customer");
-
 const User = require("./User");
-const Customer = require("./Customer");
+const Role = require("./Role");
 const ExportOrder = require("./ExportOrder");
 const ExportDetail = require("./ExportDetail");
 const CustomerReturnOrder = require("./CustomerReturnOrder");
@@ -26,10 +25,10 @@ const Activity = require("./Activity");
    1. CATEGORY / BRAND / PRODUCT / VARIANT
    =========================================================== */
 Category.hasMany(Product, { foreignKey: "CategoryID" });
-Product.belongsTo(Category, { foreignKey: "CategoryID", as: 'Category' }); 
+Product.belongsTo(Category, { foreignKey: "CategoryID", as: "Category" });
 
-Brand.hasMany(Product, { foreignKey: "BrandID", as: 'Products' }); 
-Product.belongsTo(Brand, { foreignKey: "BrandID", as: 'Brand' });
+Brand.hasMany(Product, { foreignKey: "BrandID" });
+Product.belongsTo(Brand, { foreignKey: "BrandID", as: "Brand" });
 
 Product.hasMany(Variant, { foreignKey: "BarcodeProduct" });
 Variant.belongsTo(Product, { foreignKey: "BarcodeProduct" });
@@ -37,22 +36,29 @@ Variant.belongsTo(Product, { foreignKey: "BarcodeProduct" });
 /* ===========================================================
    2. EXPORT ORDER / DETAIL
    =========================================================== */
-Customer.hasMany(ExportOrder, { foreignKey: "CustomerID", as: 'ExportOrders' });
-ExportOrder.belongsTo(Customer, { foreignKey: "CustomerID", as: 'Customer' }); 
+Customer.hasMany(ExportOrder, { foreignKey: "CustomerID" });
+ExportOrder.belongsTo(Customer, { foreignKey: "CustomerID", as: "Customer" });
 
-User.hasMany(ExportOrder, { foreignKey: "UserID", as: 'CreatedExportOrders' }); 
-ExportOrder.belongsTo(User, { foreignKey: "UserID", as: 'User' }); 
 User.hasMany(ExportOrder, { foreignKey: "UserID" });
-ExportOrder.belongsTo(User, { foreignKey: "UserID" });
-ExportOrder.belongsTo(Customer, { as: "Customer", foreignKey: "CustomerID" });
-ExportOrder.hasMany(ExportDetail, { foreignKey: "ExportID" });
-ExportDetail.belongsTo(ExportOrder, { foreignKey: "ExportID" });
+ExportOrder.belongsTo(User, { foreignKey: "UserID", as: "User" });
 
-ExportOrder.hasMany(ExportDetail, { foreignKey: "ExportID", as: 'ExportDetails' }); 
-ExportDetail.belongsTo(ExportOrder, { foreignKey: "ExportID", as: 'ExportOrder' });
+ExportOrder.hasMany(ExportDetail, {
+  foreignKey: "ExportID",
+  as: "ExportDetails",
+});
+ExportDetail.belongsTo(ExportOrder, {
+  foreignKey: "ExportID",
+  as: "ExportOrder",
+});
 
-Product.hasMany(ExportDetail, { foreignKey: "BarcodeProduct", as: 'ExportDetails' }); 
-ExportDetail.belongsTo(Product, { foreignKey: "BarcodeProduct", as: 'Product' }); 
+Product.hasMany(ExportDetail, {
+  foreignKey: "BarcodeProduct",
+  as: "ExportDetails",
+});
+ExportDetail.belongsTo(Product, {
+  foreignKey: "BarcodeProduct",
+  as: "Product",
+});
 
 /* ===========================================================
    3. CUSTOMER RETURN ORDER / DETAIL
@@ -64,51 +70,59 @@ ExportOrder.hasMany(CustomerReturnOrder, { foreignKey: "ExportID" });
 CustomerReturnOrder.belongsTo(ExportOrder, { foreignKey: "ExportID" });
 
 CustomerReturnOrder.hasMany(CustomerReturnDetail, {
+  foreignKey: "CustomerReturnOrderID",
   as: "CustomerReturnDetails",
-  foreignKey: "CustomerReturnOrderID",
 });
-
 CustomerReturnDetail.belongsTo(CustomerReturnOrder, {
-  as: "CustomerReturnOrder",
   foreignKey: "CustomerReturnOrderID",
+  as: "CustomerReturnOrder",
 });
 
 Product.hasMany(CustomerReturnDetail, {
-  as: "CustomerReturnDetail",
   foreignKey: "BarcodeProduct",
+  as: "CustomerReturnDetail",
 });
 CustomerReturnDetail.belongsTo(Product, {
-  as: "Product",
   foreignKey: "BarcodeProduct",
+  as: "Product",
 });
 
 /* ===========================================================
    4. IMPORT ORDER / DETAIL
    =========================================================== */
-Supplier.hasMany(ImportOrder, { foreignKey: "SupplierID", as: 'ImportOrders' }); 
-ImportOrder.belongsTo(Supplier, { foreignKey: "SupplierID", as: 'Supplier' });
+Supplier.hasMany(ImportOrder, { foreignKey: "SupplierID" });
+ImportOrder.belongsTo(Supplier, { foreignKey: "SupplierID", as: "Supplier" });
 
-User.hasMany(ImportOrder, { foreignKey: "UserID", as: 'CreatedImportOrders' }); 
-ImportOrder.belongsTo(User, { foreignKey: "UserID", as: 'User' }); 
+User.hasMany(ImportOrder, { foreignKey: "UserID" });
+ImportOrder.belongsTo(User, { foreignKey: "UserID", as: "User" });
 
-ImportOrder.hasMany(ImportDetail, { foreignKey: "ImportID", as: 'ImportDetails' }); 
-ImportDetail.belongsTo(ImportOrder, { foreignKey: "ImportID", as: 'ImportOrder' }); 
+ImportOrder.hasMany(ImportDetail, {
+  foreignKey: "ImportID",
+  as: "ImportDetails",
+});
+ImportDetail.belongsTo(ImportOrder, {
+  foreignKey: "ImportID",
+  as: "ImportOrder",
+});
 
-Product.hasMany(ImportDetail, { foreignKey: "BarcodeProduct", as: 'ImportDetails' }); 
-ImportDetail.belongsTo(Product, { foreignKey: "BarcodeProduct", as: 'Product' }); 
+Product.hasMany(ImportDetail, {
+  foreignKey: "BarcodeProduct",
+  as: "ImportDetails",
+});
+ImportDetail.belongsTo(Product, {
+  foreignKey: "BarcodeProduct",
+  as: "Product",
+});
 
 /* ===========================================================
    5. SUPPLIER RETURN ORDER / DETAIL
    =========================================================== */
-// User tạo phiếu trả
 User.hasMany(SupplierReturnOrder, { foreignKey: "UserID" });
 SupplierReturnOrder.belongsTo(User, { foreignKey: "UserID" });
 
-// Liên kết với ImportOrder gốc
 ImportOrder.hasMany(SupplierReturnOrder, { foreignKey: "ImportID" });
 SupplierReturnOrder.belongsTo(ImportOrder, { foreignKey: "ImportID" });
 
-// SupplierReturnOrder 1 - N SupplierReturnDetail
 SupplierReturnOrder.hasMany(SupplierReturnDetail, {
   foreignKey: "SupplierReturnOrderID",
 });
@@ -116,21 +130,20 @@ SupplierReturnDetail.belongsTo(SupplierReturnOrder, {
   foreignKey: "SupplierReturnOrderID",
 });
 
-// Product 1 - N SupplierReturnDetail
 Product.hasMany(SupplierReturnDetail, { foreignKey: "BarcodeProduct" });
 SupplierReturnDetail.belongsTo(Product, { foreignKey: "BarcodeProduct" });
 
 /* ===========================================================
-   6. AUDIT (STAFF ACTIVITY) 
-   =========================================================== */
-User.hasMany(StaffActivity, { foreignKey: "UserID", as: 'StaffActivities' });
-StaffActivity.belongsTo(User, { foreignKey: "UserID", as: 'User' });
+   6. AUDIT (STAFF ACTIVITY)
+   =========================================================== */
+User.hasMany(StaffActivity, { foreignKey: "UserID" });
+StaffActivity.belongsTo(User, { foreignKey: "UserID" });
 
-Activity.hasMany(StaffActivity, { foreignKey: "ActivityID", as: 'ActivityLogs' });
-StaffActivity.belongsTo(Activity, { foreignKey: "ActivityID", as: 'ActivityType' });
+Activity.hasMany(StaffActivity, { foreignKey: "ActivityID" });
+StaffActivity.belongsTo(Activity, { foreignKey: "ActivityID" });
 
 /* ===========================================================
-    EXPORT ALL
+   EXPORT ALL
    =========================================================== */
 module.exports = {
   sequelize,
@@ -142,7 +155,6 @@ module.exports = {
   User,
   ExportOrder,
   ExportDetail,
-  Customer,
   CustomerReturnOrder,
   CustomerReturnDetail,
   ImportOrder,
@@ -152,4 +164,5 @@ module.exports = {
   SupplierReturnDetail,
   StaffActivity,
   Activity,
+  Role,
 };

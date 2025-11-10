@@ -5,7 +5,7 @@ const { User } = require("../models");
 
 exports.register = async (req, res) => {
   try {
-    const { username, password, phone, roleId } = req.body;
+    const { username, password, phone } = req.body;
 
     if (!username || !password) {
       return res.status(400).json({ message: "Vui lòng nhập đủ thông tin" });
@@ -26,7 +26,7 @@ exports.register = async (req, res) => {
       Password: hashedPassword,
       Phone: phone || null,
       Status: true,
-      RoleID: roleId || 1,
+      RoleID: 2,
     });
 
     res.status(201).json({ message: "Đăng ký thành công" });
@@ -39,28 +39,48 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
-    if (!username || !password)
+
+    console.log("Login attempt:", { username, password }); // log input
+
+    if (!username || !password) {
+      console.log("Missing username or password");
       return res.status(400).json({ message: "Thiếu username hoặc password" });
+    }
 
     const user = await User.findOne({
       where: { Username: { [Op.eq]: username } },
     });
 
     if (!user) {
+      console.log("User not found:", username);
       return res.status(404).json({ message: "Không tìm thấy tài khoản" });
     }
+
+    console.log("User object from DB:", user.toJSON()); // check tất cả field
 
     let isMatch = false;
 
     if (user.RoleID === 1) {
+      console.log("RoleID = 1 (plain text password check)");
       isMatch = password === user.Password;
     } else {
+      console.log("RoleID != 1 (bcrypt check)");
       isMatch = await bcrypt.compare(password, user.Password);
     }
 
+    console.log("Password match result:", isMatch);
+
     if (!isMatch) {
-      return res.status(401).json({ message: "Sai mật khẩu" });
+      console.log("Password incorrect for user:", username);
+      return res.status(401).json({ message: "Sai mật khảuaaaaaaaaa" });
     }
+
+    console.log(
+      "Login successful. UserID:",
+      user.UserID,
+      "RoleID:",
+      user.RoleID
+    );
 
     const token = jwt.sign(
       { userId: user.UserID, roleID: user.RoleID },

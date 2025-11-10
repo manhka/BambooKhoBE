@@ -1,6 +1,6 @@
-const Activity = require('../models/Activity');
-const StaffActivity = require('../models/StaffActivity');
-const User = require('../models/User');
+const Activity = require("../models/Activity");
+const StaffActivity = require("../models/StaffActivity");
+const User = require("../models/User");
 
 exports.createActivity = async (req, res) => {
   try {
@@ -13,8 +13,8 @@ exports.createActivity = async (req, res) => {
     const activity = await Activity.create({
       ActivityName,
       Description: Description || null,
-      CreateAt: new Date(),
-      UpdateAt: new Date(),
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
     });
 
     res.status(201).json({ message: "Tạo hoạt động thành công", activity });
@@ -35,7 +35,7 @@ exports.updateActivity = async (req, res) => {
 
     activity.ActivityName = ActivityName ?? activity.ActivityName;
     activity.Description = Description ?? activity.Description;
-    activity.UpdateAt = new Date(); 
+    activity.UpdateAt = new Date();
     await activity.save();
     res.json({ message: "Cập nhật hoạt động thành công", activity });
   } catch (error) {
@@ -47,8 +47,8 @@ exports.updateActivity = async (req, res) => {
 exports.getActivities = async (req, res) => {
   try {
     const activities = await Activity.findAll({
-      order: [['CreateAt', 'DESC']],
-      raw: true
+      order: [["CreatedAt", "DESC"]],
+      raw: true,
     });
     res.json(activities);
   } catch (error) {
@@ -66,8 +66,12 @@ exports.assignActivity = async (req, res) => {
     }
 
     const user = await User.findByPk(UserID);
-    if (!user) return res.status(404).json({ message: "Không tìm thấy nhân viên" });
-    if (user.RoleID === 1) return res.status(400).json({ message: "Không thể giao hoạt động cho admin" });
+    if (!user)
+      return res.status(404).json({ message: "Không tìm thấy nhân viên" });
+    if (user.RoleID === 1)
+      return res
+        .status(400)
+        .json({ message: "Không thể giao hoạt động cho admin" });
 
     const activityIds = Array.isArray(ActivityID) ? ActivityID : [ActivityID];
 
@@ -75,13 +79,15 @@ exports.assignActivity = async (req, res) => {
       where: { ActivityID: activityIds },
     });
     if (activities.length !== activityIds.length) {
-      return res.status(404).json({ message: "Một hoặc nhiều hoạt động không tồn tại" });
+      return res
+        .status(404)
+        .json({ message: "Một hoặc nhiều hoạt động không tồn tại" });
     }
 
-    const newAssignments = activityIds.map(id => ({
+    const newAssignments = activityIds.map((id) => ({
       UserID,
       ActivityID: id,
-      CreateAt: new Date(),
+      CreatedAt: new Date(),
       UpdateAt: new Date(),
     }));
 
@@ -97,22 +103,24 @@ exports.assignActivity = async (req, res) => {
   }
 };
 
-
 exports.updateStaffActivity = async (req, res) => {
   try {
-    const { staffActivityId } = req.params; 
-    const { ActivityID } = req.body; 
+    const { staffActivityId } = req.params;
+    const { ActivityID } = req.body;
 
-    if (!ActivityID) return res.status(400).json({ message: "Thiếu ActivityID mới" });
+    if (!ActivityID)
+      return res.status(400).json({ message: "Thiếu ActivityID mới" });
 
     const staffActivity = await StaffActivity.findByPk(staffActivityId);
-    if (!staffActivity) return res.status(404).json({ message: "StaffActivity không tồn tại" });
+    if (!staffActivity)
+      return res.status(404).json({ message: "StaffActivity không tồn tại" });
 
     const newActivity = await Activity.findByPk(ActivityID);
-    if (!newActivity) return res.status(404).json({ message: "Hoạt động mới không tồn tại" });
+    if (!newActivity)
+      return res.status(404).json({ message: "Hoạt động mới không tồn tại" });
 
     staffActivity.ActivityID = ActivityID;
-    staffActivity.UpdateAt = new Date();
+    staffActivity.UpdatedAt = new Date();
     await staffActivity.save();
 
     res.json({
@@ -134,18 +142,18 @@ exports.getStaffActivities = async (req, res) => {
       include: [
         {
           model: Activity,
-          attributes: ['ActivityName', 'Description'],
+          attributes: ["ActivityName", "Description"],
         },
       ],
-      order: [['CreateAt', 'DESC']],
+      order: [["CreatedAt", "DESC"]],
     });
 
-    const result = staffActivities.map(sa => ({
+    const result = staffActivities.map((sa) => ({
       StaffActivityID: sa.StaffActivityID,
       ActivityID: sa.ActivityID,
       ActivityName: sa.Activity.ActivityName,
       Description: sa.Activity.Description,
-      CreateAt: sa.CreateAt,
+      CreatedAt: sa.CreatedAt,
       UpdateAt: sa.UpdateAt,
     }));
 
@@ -161,7 +169,9 @@ exports.deleteStaffActivity = async (req, res) => {
 
     const staffActivity = await StaffActivity.findByPk(staffActivityId);
     if (!staffActivity) {
-      return res.status(404).json({ message: "Không tìm thấy hoạt động của nhân viên" });
+      return res
+        .status(404)
+        .json({ message: "Không tìm thấy hoạt động của nhân viên" });
     }
 
     await staffActivity.destroy();

@@ -1,7 +1,5 @@
-const bcrypt = require("bcrypt");
-const User = require("../models/User");
-const Role = require("../models/Role");
-
+const { User, Role } = require("../models");
+const { Op } = require("sequelize");
 exports.getUsersByRole = async (req, res) => {
   try {
     const users = await User.findAll({
@@ -30,8 +28,31 @@ exports.getUsersByRole = async (req, res) => {
     res.status(500).json({ message: "Lỗi server" });
   }
 };
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.findAll({
+      where: {
+        RoleID: {
+          [Op.in]: [1, 2],
+        },
+      },
+      attributes: ["UserID", "Username", "RoleID"],
+      order: [["Username", "ASC"]],
+    });
 
-// 🔄 Bật/tắt trạng thái người dùng
+    res.status(200).json({
+      status: "success",
+      message: "fetch_users_success",
+      data: users,
+    });
+  } catch (error) {
+    console.error("Get All Users Error:", error);
+    res.status(500).json({
+      status: "error",
+      message: "server_error",
+    });
+  }
+};
 exports.toggleUserStatus = async (req, res) => {
   const { id } = req.params;
   try {
