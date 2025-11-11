@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const BrandController = require("../controllers/BrandController");
 const BrandValidator = require("../validators/BrandValidator");
+const { verifyToken } = require("../middlewares/authMiddleware");
 
 // GET routes
 router.get("/", BrandController.getAllBrands);
@@ -10,11 +11,17 @@ router.get(
   BrandValidator.validateSearchByName,
   BrandController.getBrandByName
 );
-router.get("/:id", BrandValidator.validateBrandId, BrandController.getBrandById);
+router.get(
+  "/:id",
+  verifyToken,
+  BrandValidator.validateBrandId,
+  BrandController.getBrandById
+);
 
 // POST routes
 router.post(
   "/",
+  verifyToken,
   BrandValidator.validateCreateBrand,
   BrandController.createBrand
 );
@@ -22,11 +29,13 @@ router.post(
 // PUT routes
 router.put(
   "/:id",
+  verifyToken,
   BrandValidator.validateUpdateBrand,
   BrandController.updateBrand
 );
 router.put(
   "/:id/restore",
+  verifyToken,
   BrandValidator.validateBrandId,
   BrandController.restoreBrand
 );
@@ -34,6 +43,7 @@ router.put(
 // DELETE routes
 router.delete(
   "/:id",
+  verifyToken,
   BrandValidator.validateBrandId,
   BrandController.deleteBrand
 );

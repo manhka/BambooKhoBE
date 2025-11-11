@@ -15,16 +15,6 @@ exports.validateCustomerReturnInput = async (data, isUpdate = false) => {
     }
   }
 
-  // Validate UserID
-  if (!isUpdate || data.UserID !== undefined) {
-    if (!data.UserID || !Number.isInteger(data.UserID) || data.UserID <= 0) {
-      errors.UserID = "UserID is required and must be a positive integer";
-    } else {
-      const user = await User.findByPk(data.UserID);
-      if (!user) errors.UserID = `UserID ${data.UserID} does not exist`;
-    }
-  }
-
   // Validate ExportID
   if (!isUpdate || data.ExportID !== undefined) {
     if (
@@ -46,10 +36,6 @@ exports.validateCustomerReturnInput = async (data, isUpdate = false) => {
 
     if (!data.ReturnDate || isNaN(new Date(data.ReturnDate))) {
       errors.ReturnDate = "ReturnDate is required and must be a valid date";
-    }
-
-    if (!data.UserID) {
-      errors.UserID = "UserID is required";
     }
 
     if (!data.ExportID) {

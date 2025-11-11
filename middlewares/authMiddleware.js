@@ -1,11 +1,12 @@
 const jwt = require("jsonwebtoken");
 const pool = require("../configs/db");
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 const User = require("../models/User");
 
 exports.verifyToken = async (req, res, next) => {
+  console.log("sfsaf");
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) {
     return res
@@ -46,5 +47,3 @@ exports.verifyAdmin = async (req, res, next) => {
     res.status(500).json({ message: "Lỗi server", error: err.message });
   }
 };
-
-

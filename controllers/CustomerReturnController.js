@@ -155,9 +155,9 @@ exports.createCustomerReturn = async (req, res) => {
     if (!isValid) {
       return res.status(400).json({ errors });
     }
-
-    const { ReturnDate, Reason, UserID, ExportID, BarcodeProduct, Quantity } =
-      req.body;
+    const UserID = req.user.userId;
+    console.log("userId:", UserID);
+    const { ReturnDate, Reason, ExportID, BarcodeProduct, Quantity } = req.body;
 
     // ===== 2. Tạo CustomerReturnOrder =====
     const returnOrder = await CustomerReturnOrder.create(

@@ -2,6 +2,7 @@ const { sequelize, Product, Variant, Brand, Category } = require("../models");
 const ProductValidator = require("../validators/ProductValidator");
 const VariantValidator = require("../validators/VariantValidator");
 const { Op } = require("sequelize");
+
 exports.createProductWithVariants = async (req, res) => {
   const {
     BarcodeProduct,
@@ -22,17 +23,26 @@ exports.createProductWithVariants = async (req, res) => {
 
   if (!isProductValid) {
     return res.status(400).json({
-      message: "Invalid product data",
+      message: productErrors,
       errors: productErrors,
     });
   }
-
+  const barcodeExists = await ProductValidator.checkBarcodeExists(
+    BarcodeProduct
+  );
+  if (barcodeExists) {
+    return res.status(400).json({
+      message: "Mã sản phẩm đã tồn tại",
+      errors: { BarcodeProduct: "BarcodeProduct already exists" },
+    });
+  }
   //  Step 2: Validate Variants (nếu có)
   if (Array.isArray(Variants) && Variants.length > 0) {
     const variantErrors = [];
 
     Variants.forEach((variant, index) => {
-      const { isValid, errors } = validateVariantInput(variant);
+      const { isValid, errors } =
+        VariantValidator.validateVariantInput(variant);
       if (!isValid) {
         variantErrors.push({ index, errors });
       }
