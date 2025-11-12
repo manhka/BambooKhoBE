@@ -19,7 +19,7 @@ exports.getAllCategories = async (req, res) => {
     });
 
     if (categories.length === 0) {
-      return res.status(404).json({
+      return res.status(200).json({
         status: "error",
         message: "category_not_found",
       });
@@ -49,7 +49,7 @@ exports.getCategoryById = async (req, res) => {
 
     const category = await Category.findByPk(id);
     if (!category) {
-      return res.status(404).json({
+      return res.status(200).json({
         status: "error",
         message: "category_not_found",
       });
@@ -93,7 +93,7 @@ exports.getCategoryByName = async (req, res) => {
     });
 
     if (categories.length === 0) {
-      return res.status(404).json({
+      return res.status(200).json({
         status: "error",
         message: "category_not_found",
       });
@@ -169,7 +169,7 @@ exports.updateCategory = async (req, res) => {
 
     const category = await Category.findByPk(id);
     if (!category) {
-      return res.status(404).json({
+      return res.status(200).json({
         status: "error",
         message: "category_not_found",
       });
@@ -230,7 +230,7 @@ exports.deleteCategory = async (req, res) => {
 
     const category = await Category.findByPk(id);
     if (!category) {
-      return res.status(404).json({
+      return res.status(200).json({
         status: "error",
         message: "category_not_found",
       });
@@ -268,7 +268,7 @@ exports.restoreCategory = async (req, res) => {
 
     const category = await Category.findByPk(id);
     if (!category) {
-      return res.status(404).json({
+      return res.status(200).json({
         status: "error",
         message: "category_not_found",
       });

@@ -31,7 +31,7 @@ exports.updateActivity = async (req, res) => {
 
     const activity = await Activity.findByPk(activityId);
     if (!activity)
-      return res.status(404).json({ message: "Hoạt động không tồn tại" });
+      return res.status(200).json({ message: "Hoạt động không tồn tại" });
 
     activity.ActivityName = ActivityName ?? activity.ActivityName;
     activity.Description = Description ?? activity.Description;
@@ -67,7 +67,7 @@ exports.assignActivity = async (req, res) => {
 
     const user = await User.findByPk(UserID);
     if (!user)
-      return res.status(404).json({ message: "Không tìm thấy nhân viên" });
+      return res.status(200).json({ message: "Không tìm thấy nhân viên" });
     if (user.RoleID === 1)
       return res
         .status(400)
@@ -80,7 +80,7 @@ exports.assignActivity = async (req, res) => {
     });
     if (activities.length !== activityIds.length) {
       return res
-        .status(404)
+        .status(200)
         .json({ message: "Một hoặc nhiều hoạt động không tồn tại" });
     }
 
@@ -113,11 +113,11 @@ exports.updateStaffActivity = async (req, res) => {
 
     const staffActivity = await StaffActivity.findByPk(staffActivityId);
     if (!staffActivity)
-      return res.status(404).json({ message: "StaffActivity không tồn tại" });
+      return res.status(200).json({ message: "StaffActivity không tồn tại" });
 
     const newActivity = await Activity.findByPk(ActivityID);
     if (!newActivity)
-      return res.status(404).json({ message: "Hoạt động mới không tồn tại" });
+      return res.status(200).json({ message: "Hoạt động mới không tồn tại" });
 
     staffActivity.ActivityID = ActivityID;
     staffActivity.UpdatedAt = new Date();
@@ -170,7 +170,7 @@ exports.deleteStaffActivity = async (req, res) => {
     const staffActivity = await StaffActivity.findByPk(staffActivityId);
     if (!staffActivity) {
       return res
-        .status(404)
+        .status(200)
         .json({ message: "Không tìm thấy hoạt động của nhân viên" });
     }
 

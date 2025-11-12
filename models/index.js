@@ -16,8 +16,6 @@ const CustomerReturnDetail = require("./CustomerReturnDetail");
 const ImportOrder = require("./ImportOrder");
 const ImportDetail = require("./ImportDetail");
 const Supplier = require("./Supplier");
-const SupplierReturnOrder = require("./SupplierReturnOrder");
-const SupplierReturnDetail = require("./SupplierReturnDetail");
 const StaffActivity = require("./StaffActivity");
 const Activity = require("./Activity");
 
@@ -115,25 +113,6 @@ ImportDetail.belongsTo(Product, {
 });
 
 /* ===========================================================
-   5. SUPPLIER RETURN ORDER / DETAIL
-   =========================================================== */
-User.hasMany(SupplierReturnOrder, { foreignKey: "UserID" });
-SupplierReturnOrder.belongsTo(User, { foreignKey: "UserID" });
-
-ImportOrder.hasMany(SupplierReturnOrder, { foreignKey: "ImportID" });
-SupplierReturnOrder.belongsTo(ImportOrder, { foreignKey: "ImportID" });
-
-SupplierReturnOrder.hasMany(SupplierReturnDetail, {
-  foreignKey: "SupplierReturnOrderID",
-});
-SupplierReturnDetail.belongsTo(SupplierReturnOrder, {
-  foreignKey: "SupplierReturnOrderID",
-});
-
-Product.hasMany(SupplierReturnDetail, { foreignKey: "BarcodeProduct" });
-SupplierReturnDetail.belongsTo(Product, { foreignKey: "BarcodeProduct" });
-
-/* ===========================================================
    6. AUDIT (STAFF ACTIVITY)
    =========================================================== */
 User.hasMany(StaffActivity, { foreignKey: "UserID" });
@@ -160,8 +139,6 @@ module.exports = {
   ImportOrder,
   ImportDetail,
   Supplier,
-  SupplierReturnOrder,
-  SupplierReturnDetail,
   StaffActivity,
   Activity,
   Role,

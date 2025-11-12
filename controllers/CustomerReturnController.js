@@ -105,7 +105,7 @@ exports.getWarrantyProductById = async (req, res) => {
     });
 
     if (!exportDetail) {
-      return res.status(404).json({ message: "Export detail not found" });
+      return res.status(200).json({ message: "Export detail not found" });
     }
 
     // Tính RemainingQuantity
@@ -173,7 +173,7 @@ exports.createCustomerReturn = async (req, res) => {
 
     if (!exportDetail) {
       await transaction.rollback();
-      return res.status(404).json({
+      return res.status(200).json({
         message: `Sản phẩm ${BarcodeProduct} không tồn tại trong đơn xuất.`,
       });
     }
@@ -229,7 +229,7 @@ exports.createCustomerReturn = async (req, res) => {
 
     if (!product) {
       await transaction.rollback();
-      return res.status(404).json({
+      return res.status(200).json({
         message: `Sản phẩm ${BarcodeProduct} không tồn tại trong kho.`,
       });
     }
@@ -363,7 +363,7 @@ exports.getCustomerReturnById = async (req, res) => {
     });
 
     if (!returnOrder) {
-      return res.status(404).json({ message: "Customer return not found" });
+      return res.status(200).json({ message: "Customer return not found" });
     }
 
     res.status(200).json(returnOrder);

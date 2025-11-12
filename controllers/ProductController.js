@@ -129,7 +129,7 @@ exports.updateProductWithVariants = async (req, res) => {
     const existingProduct = await Product.findByPk(barcode);
     if (!existingProduct) {
       await transaction.rollback();
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(200).json({ message: "Product not found" });
     }
 
     // 2️ Validate product input
@@ -281,7 +281,7 @@ exports.archiveProduct = async (req, res) => {
     const product = await Product.findByPk(barcode);
 
     if (!product) {
-      return res.status(404).json({
+      return res.status(200).json({
         status: "error",
         message: "product_not_found",
       });
@@ -387,8 +387,8 @@ exports.getLowStockProducts = async (req, res) => {
     const products = await Product.findAll({
       where: whereClause,
       include: [
-        { model: Brand, attributes: ["BrandName"] },
-        { model: Category, attributes: ["CategoryName"] },
+        { model: Brand, as: "Brand", attributes: ["BrandName"] },
+        { model: Category, as: "Category", attributes: ["CategoryName"] },
       ],
       order: [["NumberOfProduct", "ASC"]],
     });
@@ -441,7 +441,7 @@ exports.getProductDetail = async (req, res) => {
     });
 
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(200).json({ message: "Product not found" });
     }
 
     return res.status(200).json({
@@ -518,7 +518,7 @@ exports.getProductsForLookup = async (req, res) => {
     });
 
     if (products.length === 0) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "Không tìm thấy bất kỳ sản phẩm nào trong hệ thống.",
       });
     }

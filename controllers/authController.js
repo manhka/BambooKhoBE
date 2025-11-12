@@ -53,10 +53,8 @@ exports.login = async (req, res) => {
 
     if (!user) {
       console.log("User not found:", username);
-      return res.status(404).json({ message: "Không tìm thấy tài khoản" });
+      return res.status(200).json({ message: "Không tìm thấy tài khoản" });
     }
-
-    console.log("User object from DB:", user.toJSON()); // check tất cả field
 
     let isMatch = false;
 
@@ -72,7 +70,7 @@ exports.login = async (req, res) => {
 
     if (!isMatch) {
       console.log("Password incorrect for user:", username);
-      return res.status(401).json({ message: "Sai mật khảuaaaaaaaaa" });
+      return res.status(401).json({ message: "Sai mật khẩu" });
     }
 
     console.log(
@@ -95,6 +93,7 @@ exports.login = async (req, res) => {
         id: user.UserID,
         username: user.Username,
         roleID: user.RoleID,
+        status: user.Status,
       },
     });
   } catch (err) {

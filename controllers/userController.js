@@ -58,7 +58,7 @@ exports.toggleUserStatus = async (req, res) => {
   try {
     const user = await User.findByPk(id);
     if (!user) {
-      return res.status(404).json({ message: "Không tìm thấy user" });
+      return res.status(200).json({ message: "Không tìm thấy user" });
     }
     const newStatus = !Boolean(user.Status);
     user.Status = newStatus;
@@ -78,7 +78,7 @@ exports.updateUser = async (req, res) => {
     const user = await User.findByPk(id);
 
     if (!user) {
-      return res.status(404).json({ message: "Không tìm thấy user" });
+      return res.status(200).json({ message: "Không tìm thấy user" });
     }
 
     if (Username) user.Username = Username;

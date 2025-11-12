@@ -126,7 +126,7 @@ exports.getCustomerDetail = async (req, res) => {
 
     if (!customer) {
       return res
-        .status(404)
+        .status(200)
         .json({ status: "error", message: "customer_not_found" });
     }
 
@@ -183,7 +183,7 @@ exports.updateCustomer = async (req, res) => {
     const customer = await Customer.findByPk(customerId);
     if (!customer) {
       return res
-        .status(404)
+        .status(200)
         .json({ status: "error", message: "customer_not_found" });
     }
 
@@ -195,12 +195,10 @@ exports.updateCustomer = async (req, res) => {
       },
     });
     if (phoneExists) {
-      return res
-        .status(400)
-        .json({
-          status: "error",
-          message: "Phone_already_exists_on_another_customer",
-        });
+      return res.status(400).json({
+        status: "error",
+        message: "Phone_already_exists_on_another_customer",
+      });
     }
 
     // Cập nhật thông tin

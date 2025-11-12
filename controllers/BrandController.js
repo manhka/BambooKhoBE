@@ -20,7 +20,7 @@ exports.getAllBrands = async (req, res) => {
     });
 
     if (brands.length === 0) {
-      return res.status(404).json({
+      return res.status(200).json({
         status: "error",
         message: "brand_not_found",
       });
@@ -50,7 +50,7 @@ exports.getBrandById = async (req, res) => {
 
     const brand = await Brand.findByPk(id);
     if (!brand) {
-      return res.status(404).json({
+      return res.status(200).json({
         status: "error",
         message: "brand_not_found",
       });
@@ -94,7 +94,7 @@ exports.getBrandByName = async (req, res) => {
     });
 
     if (brands.length === 0) {
-      return res.status(404).json({
+      return res.status(200).json({
         status: "error",
         message: "brand_not_found",
       });
@@ -171,7 +171,7 @@ exports.updateBrand = async (req, res) => {
 
     const brand = await Brand.findByPk(id);
     if (!brand) {
-      return res.status(404).json({
+      return res.status(200).json({
         status: "error",
         message: "brand_not_found",
       });
@@ -227,7 +227,7 @@ exports.deleteBrand = async (req, res) => {
 
     const brand = await Brand.findByPk(id);
     if (!brand) {
-      return res.status(404).json({
+      return res.status(200).json({
         status: "error",
         message: "brand_not_found",
       });
@@ -265,7 +265,7 @@ exports.restoreBrand = async (req, res) => {
 
     const brand = await Brand.findByPk(id);
     if (!brand) {
-      return res.status(404).json({
+      return res.status(200).json({
         status: "error",
         message: "brand_not_found",
       });

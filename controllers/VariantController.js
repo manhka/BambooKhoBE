@@ -15,7 +15,7 @@ exports.createVariants = async (req, res) => {
     const product = await Product.findByPk(barcode);
     if (!product) {
       return res
-        .status(404)
+        .status(200)
         .json({ status: "error", message: "product_not_found" });
     }
 
@@ -76,7 +76,7 @@ exports.updateVariants = async (req, res) => {
 
       const variant = await Variant.findByPk(item.VariantID);
       if (!variant) {
-        return res.status(404).json({
+        return res.status(200).json({
           status: "error",
           message: `VariantID ${item.VariantID} not found`,
         });
@@ -134,7 +134,7 @@ exports.deleteVariant = async (req, res) => {
     const variant = await Variant.findByPk(id);
     if (!variant)
       return res
-        .status(404)
+        .status(200)
         .json({ status: "error", message: "variant_not_found" });
 
     await variant.destroy();
