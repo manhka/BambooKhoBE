@@ -15,6 +15,7 @@ router.put(
   productController.updateProductWithVariants
 );
 router.get("/", verifyToken, productController.getAllProducts);
+
 router.patch(
   "/archive/:barcode",
   verifyToken,

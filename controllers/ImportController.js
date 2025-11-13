@@ -38,6 +38,7 @@ exports.uploadImportFile = async (req, res) => {
         .status(400)
         .json({ message: "Excel file is empty or invalid format." });
     }
+
     const supplierId = req.body.SupplierID || jsonData[0]?.SupplierID;
     const importDate = req.body.ImportDate || new Date();
 
@@ -85,6 +86,7 @@ exports.uploadImportFile = async (req, res) => {
     }));
     await ImportDetail.bulkCreate(importDetailData, { transaction });
 
+    // Cập nhật số lượng sản phẩm
     for (const barcode in productUpdates) {
       await Product.increment("NumberOfProduct", {
         by: productUpdates[barcode],
@@ -93,15 +95,7 @@ exports.uploadImportFile = async (req, res) => {
       });
     }
 
-    if (userRoleFromToken === 2) {
-      await StaffActivity.create(
-        {
-          UserID: userIdFromToken,
-          ActivityID: 5,
-        },
-        { transaction }
-      );
-    }
+    // Không tạo StaffActivity nữa
     await transaction.commit();
 
     res.status(201).json({
@@ -116,7 +110,6 @@ exports.uploadImportFile = async (req, res) => {
       .json({ message: "Server error during import.", error: error.message });
   }
 };
-
 // ----- Function 4.2: Xem/Tìm kiếm lịch sử nhập hàng -----
 exports.getImportHistory = async (req, res) => {
   try {

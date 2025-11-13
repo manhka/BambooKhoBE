@@ -75,6 +75,7 @@ exports.createExportOrder = async (req, res) => {
       WarrantyEndTime: detail.WarrantyEndTime,
       WarrantyStatus: detail.WarrantyStatus,
     }));
+
     await ExportDetail.bulkCreate(exportDetailData, { transaction });
 
     for (const barcode in productUpdates) {
@@ -95,15 +96,7 @@ exports.createExportOrder = async (req, res) => {
       }
     }
 
-    if (userRoleFromToken === 2) {
-      await StaffActivity.create(
-        {
-          UserID: userIdFromToken,
-          ActivityID: 1,
-        },
-        { transaction }
-      );
-    }
+    // 🟩 Đã bỏ StaffActivity.create
 
     await transaction.commit();
     res
@@ -112,12 +105,10 @@ exports.createExportOrder = async (req, res) => {
   } catch (error) {
     await transaction.rollback();
     console.error("Create Export Error:", error);
-    res
-      .status(500)
-      .json({
-        message: "Server error during export creation.",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Server error during export creation.",
+      error: error.message,
+    });
   }
 };
 
@@ -159,13 +150,11 @@ exports.getExportHistory = async (req, res) => {
         group: ["ExportID"],
       }).then((details) => details.map((d) => d.ExportID));
       if (relevantExportIDs.length === 0) {
-        return res
-          .status(200)
-          .json({
-            message: "Export history retrieved successfully",
-            count: 0,
-            orders: [],
-          });
+        return res.status(200).json({
+          message: "Export history retrieved successfully",
+          count: 0,
+          orders: [],
+        });
       }
       orderWhereClause.ExportID = { [Op.in]: relevantExportIDs };
     }
@@ -179,13 +168,11 @@ exports.getExportHistory = async (req, res) => {
       ],
     });
 
-    res
-      .status(200)
-      .json({
-        message: "Export history retrieved successfully",
-        count: orders.length,
-        orders,
-      });
+    res.status(200).json({
+      message: "Export history retrieved successfully",
+      count: orders.length,
+      orders,
+    });
   } catch (error) {
     console.error("Get Export History Error:", error);
     res.status(500).json({ message: "Server error", error: error.message });

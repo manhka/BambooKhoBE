@@ -1,13 +1,30 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const activityController = require('../controllers/activityController');
+const activityController = require("../controllers/activityController");
+const { verifyToken } = require("../middlewares/authMiddleware");
 
-router.post('/create', activityController.createActivity);
-router.put('/:activityId', activityController.updateActivity);
-router.delete('/staff-activities/:staffActivityId', activityController.deleteStaffActivity);
-router.get('/view', activityController.getActivities);
-router.post('/staff-activities', activityController.assignActivity);
-router.put('/staff-activities/:staffActivityId', activityController.updateStaffActivity);
-router.get('/staff-activities/:userId', activityController.getStaffActivities);
+router.post("/create", verifyToken, activityController.createActivity);
+router.put("/:activityId", verifyToken, activityController.updateActivity);
+router.delete(
+  "/staff-activities/:staffActivityId",
+  verifyToken,
+  activityController.deleteStaffActivity
+);
+router.get("/view", verifyToken, activityController.getActivities);
+router.post(
+  "/staff-activities",
+  verifyToken,
+  activityController.assignActivity
+);
+router.put(
+  "/staff-activities/:staffActivityId",
+  verifyToken,
+  activityController.updateStaffActivity
+);
+router.get(
+  "/staff-activities/:userId",
+  verifyToken,
+  activityController.getStaffActivities
+);
 
 module.exports = router;

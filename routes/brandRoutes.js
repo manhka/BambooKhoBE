@@ -8,6 +8,7 @@ const { verifyToken } = require("../middlewares/authMiddleware");
 router.get("/", BrandController.getAllBrands);
 router.get(
   "/search/by-name",
+  verifyToken,
   BrandValidator.validateSearchByName,
   BrandController.getBrandByName
 );
